@@ -146,13 +146,10 @@ void () W_Precache = {
     precache_sound("weapons/asscan4.wav");
     precache_sound("weapons/railgun.wav");
     precache_sound("weapons/dartgun.wav");
-<<<<<<< HEAD
     precache_model("progs/ball1.mdl");
-=======
     precache_sound("misc/hitsound.wav");
     precache_sound("misc/hitsoundcrit.wav");
     precache_sound("misc/hitsoundteam.wav");
->>>>>>> master
 };
 
 float () crandom = {
@@ -1934,7 +1931,6 @@ void () W_Attack = {
             TeamFortress_SetSpeed(self);
             player_assaultcannonup1();
         }
-<<<<<<< HEAD
     } else if (self.current_weapon == WEAP_PLASMALAUNCHER) {
         if (CheckForReload() == TRUE)
             return;
@@ -1944,7 +1940,6 @@ void () W_Attack = {
         Status_Refresh(self);
         CheckForReload();
         Attack_Finished(0.5);
-=======
     } else if (self.current_weapon == WEAP_FLAMETHROWER) {
         player_shot1();
         W_FireFlame();
@@ -1964,7 +1959,6 @@ void () W_Attack = {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;
         }
->>>>>>> master
     } else if (self.current_weapon == WEAP_MEDIKIT) {
         sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
