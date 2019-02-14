@@ -2862,5 +2862,5 @@ void (entity player) DropGoalItems = {
         te = find(te, classname, "item_tfgoal");
     }
     dremove(newmis);
-    TeamFortress_SetSpeed(self);
+    TeamFortress_SetSpeed(player);
 };
