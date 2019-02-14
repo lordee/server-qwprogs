@@ -50,6 +50,11 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer;
 
 void () CTF_FlagCheck;
 void (entity pl) Sniper_ZoomReset;
+void () StartTimer;
+void () StopTimer;
+void (string cl_pwd) Admin_Check;
+void () Admin_Aliases;
+
 
 string nextmap;
 
@@ -157,7 +162,6 @@ void () DecodeLevelParms = {
     local entity ent;
 
     local entity te;
-    local float ti;
 
     if (serverflags)
         if (world.model == "maps/start.bsp")
@@ -253,69 +257,48 @@ void () DecodeLevelParms = {
 
         clanbattle = CF_GetSetting("c", "clan", "off");
         if (clanbattle) {
-
+            localcmd ("serverinfo status Standby\n");
+            
             clan_scores_dumped = 0;
             game_locked = 0;
 
+            cb_prematch = 1;
             cb_prematch_time = CF_GetSetting("pm", "prematch", "0");
-            cb_prematch_time = time + cb_prematch_time * 60;
-
-            if (timelimit && ((time + timelimit) < cb_prematch_time)) {
-
-                timelimit = timelimit + cb_prematch_time;
-                ti = ceil(timelimit / 60);
-                st = ftos(ti);
-                cvar_set("timelimit", st);
-
+            if (cb_prematch_time)
+            {
+                StartTimer();
             }
-            if (cb_prematch_time > time) {
+            if (!cb_prematch_time) {
+              cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
+                if (cb_ceasefire_time) {
 
-                cb_prematch_time = cb_prematch_time + 5;
-                ent = spawn();
-                ent.think = PreMatch_Think;
-                ent.nextthink = time + 5;
-
-            }
-
-            cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
-            if (cb_ceasefire_time != 0) {
-
-                cb_ceasefire_time = time + cb_ceasefire_time * 60;
-                if (cb_prematch_time < cb_ceasefire_time) {
-
-                    cb_prematch_time = cb_ceasefire_time + 5;
-                    if (timelimit &&
-                        ((time + timelimit) < cb_prematch_time)) {
-
-                        timelimit = timelimit + cb_ceasefire_time;
-                        ti = ceil(timelimit / 60);
-                        st = ftos(ti);
-                        cvar_set("timelimit", st);
-
+                    cease_fire = 1;
+                    bprint (2, "CEASE FIRE\n");
+                    te = find (world, classname, "player");
+                    while (te)
+                    {
+                        centerprint (te, "CEASE FIRE\n");
+                        te.immune_to_check = (time + 5);
+                        te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
+                        TeamFortress_SetSpeed (te);
+                        te = find (te, classname, "player");
                     }
+                    te = spawn ();
+                    te.classname = "ceasefire";
+                    te.think = CeaseFire_think;
+                    te.nextthink = (time + 5);
+                    te.weapon = 1;
+                    StartTimer();
 
-                }
-                cease_fire = 1;
-                bprint(PRINT_HIGH, "Cease fire\n");
-
-                te = find(world, classname, "player");
-                while (te) {
-                    centerprint(te, "Cease fire\n");
-                    te.immune_to_check = time + 10;
-                    te.tfstate = te.tfstate | TFSTATE_CANT_MOVE;
-                    TeamFortress_SetSpeed(te);
-                    te = find(te, classname, "player");
-                }
-                te = spawn();
-                te.classname = "ceasefire";
-                te.think = CeaseFire_think;
-                te.nextthink = time + 5;
-
+                }  
             }
+            
             game_locked = CF_GetSetting("lg", "locked_game", "off");
 
-        } else
+        } else {
             clanbattle = FALSE;
+            localcmd ("serverinfo status Normal\n");
+        }
 
         // automatically assign team [off]
         fl = CF_GetSetting("a", "autoteam", "off");
@@ -518,8 +501,17 @@ void () DecodeLevelParms = {
         // use plasma class
         plasmaclass = CF_GetSetting("plasma", "plasmaclass", "on");
 
+        // impulse command queueing
+        // ensures detpipe impulse isn't cleared at end of function
+        impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
+
+        // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
+        pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
+
+
         st = infokey(world, "default");
         if (st == "on") {
+            impulse_queue = FALSE;
             server_default = TRUE;
             old_grens = FALSE;
             drop_grenades = TRUE;
@@ -556,7 +548,7 @@ void () DecodeLevelParms = {
             feign_air = TRUE;
             feign_pack = TRUE;
             feign_msg = TRUE;
-            spawnfull = FALSE;
+            spawnfull = TRUE;
             stockfull = TRUE;
             stock_on_cap = TRUE;
             classtips = TRUE;
@@ -567,10 +559,13 @@ void () DecodeLevelParms = {
             ng_velocity = 1500;
             old_ng_rof = FALSE;
             plasmaclass = TRUE;
+            pyro_type = 1;
+
         }
 
         st = infokey(world, "faithful");
         if (st == "on") {
+            impulse_queue = FALSE;
             server_faithful = TRUE;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;
@@ -617,6 +612,7 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             old_ng_rof = TRUE;
             plasmaclass = FALSE;
+            pyro_type = 0;
         }
     }
 
@@ -1095,9 +1091,15 @@ entity () SelectSpawnPoint =
     local entity spot;
     local float attempts;
 
+    if (self.spawn_at_last_spawn_spot == 1) {
+        self.spawn_at_last_spawn_spot = 0;
+        return(self.last_spawn_spot);
+    }
+
     if (self.team_no != 0) {
         spot = FindTeamSpawnPoint(self.team_no);
         if (spot != world)
+            self.last_spawn_spot = spot;
             return (spot);
     }
     if (coop) {
@@ -1106,6 +1108,7 @@ entity () SelectSpawnPoint =
             lastspawn = find(world, classname, "info_player_coop");
         }
         if (lastspawn != world) {
+            self.last_spawn_spot = lastspawn;
             return (lastspawn);
         }
     } else {
@@ -1119,6 +1122,7 @@ entity () SelectSpawnPoint =
                 attempts = attempts + 1;
                 if (CheckSpawnPoint(spot.origin) || (attempts >= 10)) {
                     lastspawn = spot;
+                    self.last_spawn_spot = spot;
                     return (spot);
                 }
                 spot = find(spot, classname, "info_player_deathmatch");
@@ -1132,6 +1136,7 @@ entity () SelectSpawnPoint =
     if (serverflags) {
         spot = find(world, classname, "info_player_start2");
         if (spot) {
+            self.last_spawn_spot = spot;
             return (spot);
         }
     }
@@ -1143,6 +1148,7 @@ entity () SelectSpawnPoint =
     if (!spot) {
         error("PutClientInServer: no info_player_start on level\n");
     }
+    self.last_spawn_spot = spot;
     return (spot);
 };
 
@@ -1151,24 +1157,6 @@ void () TeamFortress_SetHealth;
 void () TeamFortress_SetEquipment;
 void () TeamFortress_StartTimers;
 void () player_touch;
-
-// moves the client forward if spawn point is occupied
-void () CheckClientSpawn = {
-    local float attempts;
-    local vector orig = self.origin;
-    attempts = 0;
-
-    while (!CheckSpawnPoint(self.origin) && attempts < 30) {
-        makevectors(self.angles);
-        self.origin = self.origin + v_forward * 60;
-        attempts = attempts + 1;
-    }
-
-    if (attempts == 30) {
-        dprint("Warning: Could not find a safe spawn point for player!\n");
-        self.origin = orig;
-    }
-};
 
 void () PutClientInServer = {
     local float oldclass;
@@ -1291,7 +1279,6 @@ void () PutClientInServer = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
 
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self, 0);
@@ -1462,7 +1449,18 @@ void () NextLevel = {
 };
 
 void () CheckRules = {
-    if ((timelimit && time >= timelimit) || (fraglimit && self.frags >= fraglimit)) {
+    if (!clanbattle)
+    {
+        if ((timelimit && (time >= timelimit)))
+        {
+            NextLevel();
+            RemoveGrenadeTimers();
+            RemovePrimeTimers();
+            RemoveGrenades();
+        }
+    }
+    if ((fraglimit && (self.frags >= fraglimit)))
+    {
         NextLevel();
         RemoveGrenadeTimers();
         RemovePrimeTimers();
@@ -1536,7 +1534,6 @@ void () PlayerJump = {
                 sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
         if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
-            stuffcmd(self, "v_idlescale 0\n");
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
@@ -1572,7 +1569,6 @@ void () PlayerJump = {
             self.count = 1;
             self.heat = 0;
             player_assaultcannondown1();
-            stuffcmd(self, "v_idlescale 0\n");
         } else {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
@@ -1999,7 +1995,6 @@ void () PlayerPostThink = {
 void () ClientConnect = {
     local entity te;
     local string st;
-    local string st2;
     local float got_one;
 
     stuffcmd(self, "set fortressone 1\n");
@@ -2021,29 +2016,16 @@ void () ClientConnect = {
         GotoNextMap();
     }
 
-    st2 = infokey(world, "apw");
-    if (st2 == string_null)
-        st2 = infokey(world, "adminpwd");
-
     st = infokey(self, "apw");
     if (st == string_null)
         st = infokey(self, "adminpwd");
-
-    if ((st2 != string_null) && (st != string_null) && (st == st2)) {
-        self.is_admin = TRUE;
-        stuffcmd(self, "setinfo apw \"");
-        stuffcmd(self, "\"\n");
-        stuffcmd(self, "setinfo adminpwd \"");
-        stuffcmd(self, "\"\n");
-        TeamFortress_Alias("countplayers", 192, 0);
-        TeamFortress_Alias("deal", 189, 0);
-        TeamFortress_Alias("kick", 190, 0);
-        TeamFortress_Alias("ban", 191, 0);
-        TeamFortress_Alias("next", 195, 0);
-        TeamFortress_Alias("ceasefire", 193, 0);
-        TeamFortress_Alias("listips", 198, 0);
-    } else
-        self.is_admin = FALSE;
+    if (st) {
+        Admin_Check(st);
+        if (self.is_admin) 
+            Admin_Aliases();
+        else
+            self.is_admin = FALSE;
+    }
 
     if (clanbattle && (self.has_disconnected != 1)) {
         got_one = 0;
@@ -2086,7 +2068,7 @@ void () ClientConnect = {
             sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in prematch time\n");
 };
 

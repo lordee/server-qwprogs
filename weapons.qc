@@ -61,7 +61,7 @@ void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
-void (float force) TeamFortress_DetonatePipebombs;
+float (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
 
@@ -109,6 +109,7 @@ void () HallucinationTimer;
 void () TranquiliserTimer;
 
 void () TeamFortress_CTF_FlagInfo;
+void () ClanMode;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -145,7 +146,13 @@ void () W_Precache = {
     precache_sound("weapons/asscan4.wav");
     precache_sound("weapons/railgun.wav");
     precache_sound("weapons/dartgun.wav");
+<<<<<<< HEAD
     precache_model("progs/ball1.mdl");
+=======
+    precache_sound("misc/hitsound.wav");
+    precache_sound("misc/hitsoundcrit.wav");
+    precache_sound("misc/hitsoundteam.wav");
+>>>>>>> master
 };
 
 float () crandom = {
@@ -567,7 +574,7 @@ void () W_FireMedikit = {
 
                 if (trace_ent.playerclass == PC_MEDIC)
                     return;
-                if (cb_prematch_time > time)
+                if (cb_prematch)
                     return;
                 if (trace_ent.tfstate & TFSTATE_INFECTED)
                     return;
@@ -1256,7 +1263,7 @@ void () W_FireGrenade = {
     newmis.owner = self;
     newmis.movetype = 10;
     newmis.solid = 2;
-    if ((self.weaponmode == 0) || (cb_prematch_time > time)) {
+    if ((self.weaponmode == 0) || (cb_prematch)) {
         newmis.weapon = 5;
         newmis.classname = "grenade";
         newmis.skin = 1;
@@ -1677,7 +1684,7 @@ float () W_CheckNoAmmo = {
 void () W_Reload_shotgun = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_shot.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1686,7 +1693,7 @@ void () W_Reload_shotgun = {
 void () W_Reload_super_shotgun = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_shot2.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1696,7 +1703,7 @@ void (entity pl) W_Reload_sniper_rifle = {
     pl.reload_sniper_ticks = 0;
     pl.tfstate = pl.tfstate - (pl.tfstate & TFSTATE_RELOADING);
     pl.weaponmodel = "progs/v_srifle.mdl";
-    sprint(pl, PRINT_LOW, "Finished reloading\n");
+    sprint(pl, PRINT_HIGH, "Finished reloading\n");
     W_WeaponState_Load(pl, 0);
     Status_Refresh(pl);
 };
@@ -1720,7 +1727,7 @@ void () W_Reload_grenade_launcher = {
         self.owner.weaponmodel = "progs/v_rock.mdl";
     else
         self.owner.weaponmodel = "progs/v_pipe.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1729,7 +1736,7 @@ void () W_Reload_grenade_launcher = {
 void () W_Reload_rocket_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_rock2.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1927,6 +1934,7 @@ void () W_Attack = {
             TeamFortress_SetSpeed(self);
             player_assaultcannonup1();
         }
+<<<<<<< HEAD
     } else if (self.current_weapon == WEAP_PLASMALAUNCHER) {
         if (CheckForReload() == TRUE)
             return;
@@ -1936,6 +1944,27 @@ void () W_Attack = {
         Status_Refresh(self);
         CheckForReload();
         Attack_Finished(0.5);
+=======
+    } else if (self.current_weapon == WEAP_FLAMETHROWER) {
+        player_shot1();
+        W_FireFlame();
+        if (self.waterlevel > 2)
+            Attack_Finished(1);
+        else
+            Attack_Finished(0.15);
+    } else if (self.current_weapon == WEAP_INCENDIARY) {
+        if (self.ammo_rockets >= 3) {
+            player_rocket1();
+            W_FireIncendiaryCannon();
+            if (pyro_type == 1)
+                Attack_Finished(0.9);
+            else 
+                Attack_Finished(1.2);
+        } else if (time >= self.antispam_incendiary_cannon) {
+            sprint(self, PRINT_HIGH, "Not enough ammo\n");
+            self.antispam_incendiary_cannon = time + 3;
+        }
+>>>>>>> master
     } else if (self.current_weapon == WEAP_MEDIKIT) {
         sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
@@ -1973,7 +2002,7 @@ void () W_PrintWeaponMessage = {
     if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (self.weaponmode == GL_NORMAL)
             sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
-        else if (cb_prematch_time > time)
+        else if (cb_prematch)
             sprint(self, PRINT_MEDIUM,
                    "Pipebomb mode not available in prematch\n");
         else if (self.weaponmode == GL_PIPEBOMB)
@@ -2316,10 +2345,13 @@ void () DeadImpulses;
 void (entity player) UseTeleSkill;
 
 void () ImpulseCommands = {
+    float clearImpulse; // related to impulse_queue
+    clearImpulse = TRUE;
+
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if ((cb_prematch_time > time) || cease_fire) {
+    if (cb_prematch || cease_fire) {
         PreMatchImpulses();
         DeadImpulses();
         self.impulse = 0;
@@ -2416,8 +2448,8 @@ void () ImpulseCommands = {
         TeamFortress_Discard_DropAmmo();
     else if (self.impulse == TF_DASH)
         CF_Scout_Dash();
-    else if (self.impulse == TF_PB_DETONATE)
-        TeamFortress_DetonatePipebombs(0);
+    else if (self.impulse == TF_PB_DETONATE)       
+        clearImpulse = TeamFortress_DetonatePipebombs(0);
     else if (self.impulse == TF_DETPACK_STOP)
         TeamFortress_DetpackStop();
     else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
@@ -2497,7 +2529,11 @@ void () ImpulseCommands = {
     if (self.impulse == TF_DETPACK)
         self.last_impulse = self.impulse;
 
-    self.impulse = 0;
+    if (clearImpulse)
+    {
+        self.impulse = 0;
+    }
+    
 };
 
 void () PreMatchImpulses = {
@@ -2534,7 +2570,7 @@ void () DeadImpulses = {
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
         Menu_Class(0);
-    } else if (self.is_admin == 1) {
+    } else if (self.is_admin) {
         if (self.impulse == 193)
             Admin_CeaseFire();
         else if (self.impulse == 192)
@@ -2549,6 +2585,12 @@ void () DeadImpulses = {
             Admin_CycleDeal();
         else if (self.impulse == 198)
             Admin_ListIPs();
+        else if (self.impulse == 207)
+            ClanMode();
+        else if (self.impulse == 239) {
+            self.current_menu_page = 1;
+            Menu_Admin();
+        }
     }
     if (self.impulse == TF_HELP_MAP)
         TeamFortress_HelpMap();
@@ -2643,7 +2685,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_MEDIC_HELPME)
+    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
@@ -2740,9 +2782,8 @@ void () W_WeaponFrame = {
         Menu_Class(0);
         self.impulse = 0;
         return;
-    }
-
-    if (intermission_running || cease_fire)
+    }    
+    if (intermission_running)
         return;
 
     // hwguy assault cannon special
@@ -2793,6 +2834,8 @@ void () W_WeaponFrame = {
 
     if (self.impulse != 0 && self.has_disconnected == 0)
         ImpulseCommands();
+    if (cease_fire)
+        return;
 
     if (self.button0 && !self.fire_held_down) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {

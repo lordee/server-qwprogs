@@ -176,10 +176,11 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
         self.nextpc = inp;
-        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint()) {
             self.has_changedclass = 1;
             self.clientkillforce = 0;
             self.clientkillfree = 1;
+            self.spawn_at_last_spawn_spot = 1;
             ClientKill();
             self.has_changedclass = 0;
             self.suicide_time = time;
@@ -233,7 +234,6 @@ void (float inp) TeamFortress_ChangeClass = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
 
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -1628,6 +1628,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SCOUT_MAXAMMO_SHOT;
             self.ammo_cells = PC_SCOUT_MAXAMMO_CELL;
             self.armortype = PC_SCOUT_MAXARMORTYPE;
+            self.no_grenades_1 = PC_SCOUT_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_SCOUT_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1638,6 +1640,9 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SCOUT_INITAMMO_SHOT;
             self.ammo_cells = PC_SCOUT_INITAMMO_CELL;
             self.armortype = PC_SCOUT_INITARMORTYPE;
+            self.no_grenades_1 = PC_SCOUT_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_SCOUT_GRENADE_INIT_2;
+
             if (old_hp_armor)
                 self.armorvalue = 25;
             else
@@ -1654,8 +1659,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SCOUT_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SCOUT_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SCOUT_MAXAMMO_CELL;
-        self.no_grenades_1 = PC_SCOUT_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_SCOUT_GRENADE_INIT_2;
+        self.max_grenades_1 = PC_SCOUT_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_SCOUT_GRENADE_MAX_2;
 
         if (old_grens == 1)
             self.tp_grenades_1 = GR_TYPE_FLASH;
@@ -1690,6 +1695,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SNIPER_MAXAMMO_SHOT;
             self.ammo_cells = PC_SNIPER_MAXAMMO_CELL;
             self.armortype = PC_SNIPER_MAXARMORTYPE;
+            self.no_grenades_1 = PC_SNIPER_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_SNIPER_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1700,6 +1707,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SNIPER_INITAMMO_SHOT;
             self.ammo_cells = PC_SNIPER_INITAMMO_CELL;
             self.armortype = PC_SNIPER_INITARMORTYPE;
+            self.no_grenades_1 = PC_SNIPER_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_SNIPER_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 0;
             else
@@ -1716,9 +1725,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SNIPER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SNIPER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SNIPER_MAXAMMO_CELL;
-
-        self.no_grenades_1 = PC_SNIPER_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_SNIPER_GRENADE_INIT_2;
+        self.max_grenades_1 = PC_SNIPER_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_SNIPER_GRENADE_MAX_2;
+        
         self.tp_grenades_1 = PC_SNIPER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SNIPER_GRENADE_TYPE_2;
         self.tf_items = PC_SNIPER_TF_ITEMS;
@@ -1744,6 +1753,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
             self.ammo_cells = PC_SOLDIER_MAXAMMO_CELL;
             self.armortype = PC_SOLDIER_MAXARMORTYPE;
+            self.no_grenades_1 = PC_SOLDIER_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 200;
             else
@@ -1754,6 +1765,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SOLDIER_INITAMMO_SHOT;
             self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
             self.armortype = PC_SOLDIER_INITARMORTYPE;
+            self.no_grenades_1 = PC_SOLDIER_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_SOLDIER_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 100;
             else
@@ -1770,9 +1783,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SOLDIER_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_SOLDIER_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_SOLDIER_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_SOLDIER_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_SOLDIER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SOLDIER_GRENADE_TYPE_2;
         self.tf_items = PC_SOLDIER_TF_ITEMS;
@@ -1799,6 +1812,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
             self.ammo_cells = PC_DEMOMAN_MAXAMMO_CELL;
             self.armortype = PC_DEMOMAN_MAXARMORTYPE;
+            self.no_grenades_1 = PC_DEMOMAN_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_DEMOMAN_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 120;
             else
@@ -1809,6 +1824,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_DEMOMAN_INITAMMO_SHOT;
             self.ammo_cells = PC_DEMOMAN_INITAMMO_CELL;
             self.armortype = PC_DEMOMAN_INITARMORTYPE;
+            self.no_grenades_1 = PC_DEMOMAN_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_DEMOMAN_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1825,9 +1842,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
         self.maxammo_cells = PC_DEMOMAN_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_DEMOMAN_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_DEMOMAN_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_DEMOMAN_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_DEMOMAN_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_DEMOMAN_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_DEMOMAN_GRENADE_TYPE_2;
         self.tf_items = PC_DEMOMAN_TF_ITEMS;
@@ -1855,6 +1872,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_MEDIC_MAXAMMO_SHOT;
             self.ammo_cells = PC_MEDIC_MAXAMMO_CELL;
             self.armortype = PC_MEDIC_MAXARMORTYPE;
+            self.no_grenades_1 = PC_MEDIC_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_MEDIC_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 100;
             else
@@ -1865,6 +1884,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_MEDIC_INITAMMO_SHOT;
             self.ammo_cells = PC_MEDIC_INITAMMO_CELL;
             self.armortype = PC_MEDIC_INITARMORTYPE;
+            self.no_grenades_1 = PC_MEDIC_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_MEDIC_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1881,9 +1902,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_MEDIC_MAXAMMO_NAIL;
         self.maxammo_shells = PC_MEDIC_MAXAMMO_SHOT;
         self.maxammo_cells = PC_MEDIC_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_MEDIC_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_MEDIC_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_MEDIC_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_MEDIC_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_MEDIC_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_MEDIC_GRENADE_TYPE_2;
         self.tf_items = PC_MEDIC_TF_ITEMS;
@@ -1930,6 +1951,9 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
             self.ammo_cells = PC_HVYWEAP_MAXAMMO_CELL;
             self.armortype = PC_HVYWEAP_MAXARMORTYPE;
+            self.no_grenades_1 = PC_HVYWEAP_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_HVYWEAP_GRENADE_MAX_2;
+
             if (old_hp_armor)
                 self.armorvalue = 300;
             else
@@ -1940,6 +1964,9 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_HVYWEAP_INITAMMO_SHOT;
             self.ammo_cells = PC_HVYWEAP_INITAMMO_CELL;
             self.armortype = PC_HVYWEAP_INITARMORTYPE;
+            self.no_grenades_1 = PC_HVYWEAP_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_HVYWEAP_GRENADE_INIT_2;
+
             if (old_hp_armor)
                 self.armorvalue = 150;
             else
@@ -1956,9 +1983,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
         self.maxammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
         self.maxammo_cells = PC_HVYWEAP_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_HVYWEAP_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_HVYWEAP_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_HVYWEAP_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_HVYWEAP_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_HVYWEAP_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_HVYWEAP_GRENADE_TYPE_2;
         self.tf_items = PC_HVYWEAP_TF_ITEMS;
@@ -1985,6 +2012,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_PYRO_MAXAMMO_SHOT;
             self.ammo_cells = PC_PYRO_MAXAMMO_CELL;
             self.armortype = PC_PYRO_MAXARMORTYPE;
+            self.no_grenades_1 = PC_PYRO_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_PYRO_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 150;
             else
@@ -1995,6 +2024,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_PYRO_INITAMMO_SHOT;
             self.ammo_cells = PC_PYRO_INITAMMO_CELL;
             self.armortype = PC_PYRO_INITARMORTYPE;
+            self.no_grenades_1 = PC_PYRO_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_PYRO_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -2011,9 +2042,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_PYRO_MAXAMMO_NAIL;
         self.maxammo_shells = PC_PYRO_MAXAMMO_SHOT;
         self.maxammo_cells = PC_PYRO_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_PYRO_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_PYRO_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_PYRO_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_PYRO_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_PYRO_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_PYRO_GRENADE_TYPE_2;
         self.tf_items = PC_PYRO_TF_ITEMS;
@@ -2095,6 +2126,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
             self.ammo_cells = PC_CIVILIAN_MAXAMMO_CELL;
             self.armortype = PC_CIVILIAN_MAXARMORTYPE;
+            self.no_grenades_1 = PC_CIVILIAN_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_CIVILIAN_GRENADE_MAX_2;
             if (old_hp_armor)
                 self.armorvalue = 0;
             else
@@ -2105,6 +2138,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_CIVILIAN_INITAMMO_SHOT;
             self.ammo_cells = PC_CIVILIAN_INITAMMO_CELL;
             self.armortype = PC_CIVILIAN_INITARMORTYPE;
+            self.no_grenades_1 = PC_CIVILIAN_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_CIVILIAN_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 0;
             else
@@ -2121,9 +2156,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_CIVILIAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
         self.maxammo_cells = PC_CIVILIAN_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_CIVILIAN_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_CIVILIAN_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_CIVILIAN_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_CIVILIAN_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_CIVILIAN_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_CIVILIAN_GRENADE_TYPE_2;
         self.tf_items = PC_CIVILIAN_TF_ITEMS;
@@ -2148,6 +2183,9 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SPY_MAXAMMO_SHOT;
             self.ammo_cells = PC_SPY_MAXAMMO_CELL;
             self.armortype = PC_SPY_MAXARMORTYPE;
+            self.no_grenades_1 = PC_SPY_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_SPY_GRENADE_MAX_2;
+
             if (old_hp_armor)
                 self.armorvalue = 100;
             else
@@ -2158,6 +2196,9 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SPY_INITAMMO_SHOT;
             self.ammo_cells = PC_SPY_INITAMMO_CELL;
             self.armortype = PC_SPY_INITARMORTYPE;
+            self.no_grenades_1 = PC_SPY_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_SPY_GRENADE_INIT_2;
+
             if (old_hp_armor)
                 self.armorvalue = 25;
             else
@@ -2174,9 +2215,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SPY_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SPY_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SPY_MAXAMMO_CELL;
-
-        self.no_grenades_1 = PC_SPY_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_SPY_GRENADE_INIT_2;
+        self.max_grenades_1 = PC_SPY_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_SPY_GRENADE_MAX_2;
+        
         self.tp_grenades_1 = PC_SPY_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SPY_GRENADE_TYPE_2;
         self.tf_items = PC_SPY_TF_ITEMS;
@@ -2210,6 +2251,9 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
             self.ammo_cells = PC_ENGINEER_MAXAMMO_CELL;
             self.armortype = PC_ENGINEER_MAXARMORTYPE;
+            self.no_grenades_1 = PC_ENGINEER_GRENADE_MAX_1;
+            self.no_grenades_2 = PC_ENGINEER_GRENADE_MAX_2;
+
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -2220,6 +2264,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_ENGINEER_INITAMMO_SHOT;
             self.ammo_cells = PC_ENGINEER_INITAMMO_CELL;
             self.armortype = PC_ENGINEER_INITARMORTYPE;
+            self.no_grenades_1 = PC_ENGINEER_GRENADE_INIT_1;
+            self.no_grenades_2 = PC_ENGINEER_GRENADE_INIT_2;
             if (old_hp_armor)
                 self.armorvalue = 25;
             else
@@ -2236,9 +2282,9 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_ENGINEER_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_ENGINEER_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_ENGINEER_GRENADE_MAX_2;
 
-        self.no_grenades_1 = PC_ENGINEER_GRENADE_INIT_1;
-        self.no_grenades_2 = PC_ENGINEER_GRENADE_INIT_2;
         self.tp_grenades_1 = PC_ENGINEER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_ENGINEER_GRENADE_TYPE_2;
         self.tf_items = PC_ENGINEER_TF_ITEMS;
@@ -2265,6 +2311,8 @@ void () TeamFortress_SetEquipment = {
         self.no_grenades_2 = 0;
         self.tp_grenades_1 = 0;
         self.tp_grenades_2 = 0;
+        self.max_grenades_1 = 0;
+        self.max_grenades_2 = 0;
 
         self.armorclass = 0;
         self.armortype = 0;
@@ -2512,7 +2560,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
             restime = restime + 7;
         }
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         if (self.lives > 0)
             self.lives = self.lives - 1;
 

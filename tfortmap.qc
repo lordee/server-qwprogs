@@ -804,21 +804,14 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 Player.no_grenades_1 + Goal.no_grenades_1;
             Player.no_grenades_2 =
                 Player.no_grenades_2 + Goal.no_grenades_2;
+            
+             if (Player.no_grenades_1 > Player.max_grenades_1) {
+                Player.no_grenades_1 = Player.max_grenades_1;
+            }
+            if (Player.no_grenades_2 > Player.max_grenades_2) {
+                Player.no_grenades_2 = Player.max_grenades_2;
+            }
 
-            if (Player.no_grenades_1 > 4) {
-                Player.no_grenades_1 = 4;
-            }
-            if (Player.no_grenades_2 > 4) {
-                Player.no_grenades_2 = 4;
-            }
-            if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_1 > 2)) {
-                Player.no_grenades_1 = 2;
-            }
-            if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_2 > 2)) {
-                Player.no_grenades_2 = 2;
-            }
             if (Player.ammo_detpack > Player.maxammo_detpack) {
                 Player.ammo_detpack = Player.maxammo_detpack;
             }
@@ -911,8 +904,8 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         Player.ammo_medikit = Player.maxammo_medikit;
                         Player.ammo_detpack = Player.maxammo_detpack;
 
-                        Player.no_grenades_1 = GetMaxGrenades(1, Player.tp_grenades_1);
-                        Player.no_grenades_2 = GetMaxGrenades(2, Player.tp_grenades_2);
+                        Player.no_grenades_1 = Player.max_grenades_1;
+                        Player.no_grenades_2 = Player.max_grenades_2;
 
                         te = find(Player, classname, "timer");
 
@@ -1071,18 +1064,11 @@ void (entity Goal, entity Player) RemoveResults = {
     Player.no_grenades_1 = Player.no_grenades_1 - Goal.no_grenades_1;
     Player.no_grenades_2 = Player.no_grenades_2 - Goal.no_grenades_2;
 
-    if (Player.no_grenades_1 > 4)
-        Player.no_grenades_1 = 4;
+    if (Player.no_grenades_1 > Player.max_grenades_1)
+        Player.no_grenades_1 = Player.max_grenades_1;
 
-    if (Player.no_grenades_2 > 4)
-        Player.no_grenades_2 = 4;
-
-    if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_1 > 2))
-        Player.no_grenades_1 = 2;
-    if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_2 > 2))
-        Player.no_grenades_2 = 2;
+    if (Player.no_grenades_2 > Player.max_grenades_2)
+        Player.no_grenades_2 = Player.max_grenades_2;
 
     if (Player.ammo_detpack > Player.maxammo_detpack)
         Player.ammo_detpack = Player.maxammo_detpack;
@@ -1330,7 +1316,7 @@ float (entity Goal, entity AP) Activated = {
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate = {
     local entity te;
 
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
 
     
@@ -1649,7 +1635,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     local float winners;
     local float gotone;
 
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         return;
     }
     if (Goal.goal_state == 1) {
@@ -1671,8 +1657,13 @@ void (entity Goal, entity AP, float addb) DoResults = {
     if ((Goal.classname == "info_tfgoal") && (Goal.mdl != string_null)) {
         setmodel(Goal, string_null);
     }
+
     if (Goal.noise) {
-        sound(other, 3, Goal.noise, 1, 1);
+        if (other == world) {
+            sound(Goal, 3, Goal.noise, 1, 1);
+        } else {
+            sound(other, 3, Goal.noise, 1, 1);
+        }
     }
     winners = 0;
     if (Goal.increase_team1 != 0) {
@@ -1953,7 +1944,7 @@ void () tfgoal_touch = {
         return;
     if (other.classname != "player")
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
     if (self.goal_state == TFGS_ACTIVE)
         return;
@@ -2015,7 +2006,7 @@ void () item_tfgoal_touch = {
         return;
     if (other.health <= 0)
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
     if (other.is_feigning)
         return;
@@ -2131,10 +2122,21 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     /* if (Item.goal_activation & TFGI_ITEMGLOWS) */
     /*     Item.effects = EF_DIMLIGHT; */
 
-    if (Item.items & IT_KEY1)
+    if (Item.items & IT_KEY1) {
         AP.items = AP.items | IT_KEY1;
-    if (Item.items & IT_KEY2)
+        if (Item.message == string_null) {
+            Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        }
+        // else is taken care of in DoResults()
+    }
+
+    if (Item.items & IT_KEY2) {
         AP.items = AP.items | IT_KEY2;
+        if (Item.message == string_null) {
+            Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        }
+        // else is taken care of in DoResults()
+    }
 
     if (Goal != Item) {
         if (Goal.goal_result & TFGR_NO_ITEM_RESULTS) {
@@ -2204,9 +2206,6 @@ void () ReturnItem = {
 
     setorigin(self.enemy, self.enemy.origin);
     tfgoalitem_checkgoalreturn(self.enemy);
-
-    if (self.enemy.origin == self.enemy.oldorigin)
-        return;
 
     sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
 
@@ -2780,7 +2779,6 @@ void (entity P) ForceRespawn = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self, 0);
     if ((spot.classname == "info_player_teamspawn") &&
@@ -2864,6 +2862,11 @@ void (entity player) DropGoalItems = {
         te = find(te, classname, "item_tfgoal");
     }
     dremove(newmis);
+<<<<<<< HEAD
 
     TeamFortress_SetSpeed(player);
 };
+=======
+    TeamFortress_SetSpeed(self);
+};
+>>>>>>> master

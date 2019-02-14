@@ -226,7 +226,7 @@ void () health_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     medi = 0;
@@ -332,7 +332,7 @@ void () armor_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     if (self.classname == "item_armor1") {
@@ -485,29 +485,11 @@ void (entity p) bound_other_ammo = {
     if (p.armorvalue > p.maxarmor) {
         p.armorvalue = p.maxarmor;
     }
-    if (p.no_grenades_1 > 4) {
-        p.no_grenades_1 = 4;
+    if (p.no_grenades_1 > p.max_grenades_1) {
+        p.no_grenades_1 = p.max_grenades_1;
     }
-    if (p.no_grenades_2 > 4) {
-        p.no_grenades_2 = 4;
-    }
-    if ((p.tp_grenades_1 == 3) && (p.no_grenades_1 > 2)) {
-        p.no_grenades_1 = 2;
-    }
-    if ((p.tp_grenades_2 == 3) && (p.no_grenades_2 > 2)) {
-        p.no_grenades_2 = 2;
-    }
-    if ((p.tp_grenades_1 == 2) && (p.no_grenades_1 > 3)) {
-        p.no_grenades_1 = 3;
-    }
-    if ((p.tp_grenades_2 == 2) && (p.no_grenades_2 > 3)) {
-        p.no_grenades_2 = 3;
-    }
-    if ((p.tp_grenades_1 == 10) && (p.no_grenades_1 > 3)) {
-        p.no_grenades_1 = 3;
-    }
-    if ((p.tp_grenades_2 == 10) && (p.no_grenades_2 > 3)) {
-        p.no_grenades_2 = 3;
+    if (p.no_grenades_2 > p.max_grenades_2) {
+        p.no_grenades_2 = p.max_grenades_2;
     }
 };
 
@@ -568,7 +550,7 @@ void () weapon_touch = {
         return;
     if ((other.tfstate & 65536) || (other.tfstate & 2048))
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch == 1)
         return;
 
     stemp = self;
@@ -783,22 +765,6 @@ void (entity pl, float typ) PrintGrenadeType = {
     sprint(pl, PRINT_HIGH, st);
 };
 
-float (float pf_grenade_number, float pf_grenade_type) GetMaxGrenades = {
-    if (pf_grenade_number == 1) {
-        if (pf_grenade_type == GR_TYPE_NAIL) {
-            return 2;
-        }
-        if (pf_grenade_type == GR_TYPE_CALTROP) {
-            return 3;
-        }
-    } else {
-        if (pf_grenade_type == GR_TYPE_NAIL) {
-            return 2;
-        }
-    }
-    return 4;
-}
-
 void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoundGrenade = {
     if (!pf_grenade_count)
         return;
@@ -825,14 +791,14 @@ float () GetGrenadePossibility = {
         return 0;
     }
     if (random() < 0.500) {
-        maxg = GetMaxGrenades(1, other.tp_grenades_1);
+        maxg = other.max_grenades_1;
         if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
             other.no_grenades_1 = other.no_grenades_1 + 1;
             PrintFoundGrenade(other, other.tp_grenades_1, 1);
             return 1;
         }
     } else {
-        maxg = GetMaxGrenades(1, other.tp_grenades_2);
+        maxg = other.max_grenades_2;
         if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
             other.no_grenades_2 = other.no_grenades_2 + 1;
             PrintFoundGrenade(other, other.tp_grenades_2, 1);
@@ -857,7 +823,7 @@ void () ammo_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     gotgren = 0;
@@ -1064,7 +1030,7 @@ void () key_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
@@ -1164,7 +1130,7 @@ void () sigil_touch = {
         return;
     if ((other.tfstate & 65536) || (other.tfstate & 2048))
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch == 1)
         return;
 
     sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
@@ -1217,7 +1183,7 @@ void () powerup_touch = {
         return;
     if ((other.tfstate & 65536) || (other.tfstate & 2048))
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch == 1)
         return;
 
     sprint(other, PRINT_LOW, "You got the ");
@@ -1358,7 +1324,7 @@ void () BackpackTouch = {
     if (drop_grenpack && other.playerclass != PC_SCOUT) {
 
         // give grenade type 1
-        maxg = GetMaxGrenades(1, other.tp_grenades_1);
+        maxg = other.max_grenades_1;
         if ((other.no_grenades_1 + self.no_grenades_1) >= maxg)
             giveg = maxg - other.no_grenades_1;
         else
@@ -1367,7 +1333,7 @@ void () BackpackTouch = {
         PrintFoundGrenade(other, other.tp_grenades_1, giveg);
 
         // give grenade type 2
-        maxg = GetMaxGrenades(2, other.tp_grenades_2);
+        maxg = other.max_grenades_2;
         if ((other.no_grenades_2 + self.no_grenades_2) >= maxg)
             giveg = maxg - other.no_grenades_2;
         else
@@ -1412,7 +1378,7 @@ void () BackpackTouch = {
 };
 
 void () DropBackpack = {
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch == 1)
         return;
 
     if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {

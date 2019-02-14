@@ -111,6 +111,11 @@ typedef void (float n) f_void_float;
 .float weaponmode;              // Used for multiple mode weapons
 .float last_weaponmode;         // Last weapon's weapon mode
 .float motd;                    // Used to display MOTD
+.float current_menu;
+.float current_menu_type;
+.float current_menu_page;
+.float menu_count;
+.float menu_displaytime;
 .f_void_float menu_input;
 
 float toggleflags;              // toggleable flags
@@ -420,6 +425,7 @@ float already_chosen_map;
 
 float clanbattle;
 float clan_scores_dumped;
+float cb_prematch;
 float cb_prematch_time;
 float cb_ceasefire_time;
 float game_locked;
@@ -490,6 +496,8 @@ float ng_damage;
 float sng_damage;
 float old_ng_rof;
 float plasmaclass;
+float impulse_queue;
+float pyro_type;
 
 .float teamkills;
 
@@ -514,6 +522,17 @@ float intermission_exittime;
 // plasma class
 .float lifenum;
 
+// ability for doors to close instantly if they have a wait and are blocked
+.float forcecloseonblock;
+
+// used to remember last spawn
+.entity last_spawn_spot;
+.float spawn_at_last_spawn_spot;
+
+.float max_grenades_1;
+.float max_grenades_2;
+
+.entity chain2; // allows for nesting of findradius (use in EMPGrenadeExplode)
 
 //============================================================================
 
@@ -550,3 +569,6 @@ string (string s, float width) strpadr =
 
     return s;
 };
+
+float captainmode;
+.float captain;
