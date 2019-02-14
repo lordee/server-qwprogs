@@ -59,7 +59,7 @@ void () UseSpecialSkill = {
         Status_Refresh(self);
         self.impulse = 0;
         return;
-    } else if (self.playerclass == PC_PLASMA && plasmaclass) {
+    } else if (self.playerclass == PC_PLASMA) {
         self.impulse = TF_PLASMA_USETELE;
     } else if (self.playerclass == PC_SPY)
         self.impulse = TF_SPY_DIE;
@@ -1077,7 +1077,7 @@ float (float pc) IsLegalClass = {
         bit = TF_ILL_MEDIC;
     else if (pc == PC_HVYWEAP)
         bit = TF_ILL_HVYWEP;
-    else if (pc == PC_PYRO && !plasmaclass)
+    else if (pc == PC_PYRO)
         bit = TF_ILL_PYRO;
     else if (pc == PC_PLASMA)
         bit = TF_ILL_PLASMA;
@@ -2097,6 +2097,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_PLASMA_MAXAMMO_NAIL;
         self.maxammo_shells = PC_PLASMA_MAXAMMO_SHOT;
         self.maxammo_cells = PC_PLASMA_MAXAMMO_CELL;
+        self.max_grenades_1 = PC_PLASMA_GRENADE_MAX_1;
+        self.max_grenades_2 = PC_PLASMA_GRENADE_MAX_2;
 
         self.no_grenades_1 = PC_PLASMA_GRENADE_INIT_1;
         self.no_grenades_2 = PC_PLASMA_GRENADE_INIT_2;
@@ -2844,7 +2846,18 @@ void () TeamFortress_AmmoboxTouch = {
             self.ammo_shells = 0;
             other.ammo_cells = other.ammo_cells + self.ammo_cells;
             self.ammo_cells = 0;
-        } else if (other.playerclass == PC_PYRO || other.playerclass == PC_PLASMA) {
+        } else if (other.playerclass == PC_PYRO) {
+            if (!(self.ammo_shells + self.ammo_rockets + self.ammo_cells)) {
+                other.nopickup = self;
+                return;
+            }
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            self.ammo_shells = 0;
+            other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
+            self.ammo_rockets = 0;
+            other.ammo_cells = other.ammo_cells + self.ammo_cells;
+            self.ammo_cells = 0;
+        } else if (other.playerclass == PC_PLASMA) {
             if (!(self.ammo_shells + self.ammo_rockets + self.ammo_cells)) {
                 other.nopickup = self;
                 return;
@@ -2856,6 +2869,7 @@ void () TeamFortress_AmmoboxTouch = {
             other.ammo_cells = other.ammo_cells + self.ammo_cells;
             self.ammo_cells = 0;
         }
+
         other.nopickup = self;
         if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells))
             dremove(self);

@@ -333,10 +333,10 @@ void (float update) Menu_Class = {
     local string s_medic    = Q"\s[5]\s Medic   ";
     local string s_hwguy    = Q"\s[6]\s HWGuy   ";
     local string s_pyro     = Q"\s[7]\s Pyro  ";
-    local string s_plasma   = Q"\s[7]\s Plasma  ";
     local string s_spy      = Q"\s[8]\s Spy     ";
     local string s_engineer = Q"\s[9]\s Engineer";
     local string s_randompc = Q"\s[0]\s RandomPC";
+    local string s_plasma   = Q"\s[0]\s Plasma  ";
 
     // put together class strings - all strings are strzoned
     s_scout = Menu_Class_ClassString(PC_SCOUT, s_scout);
@@ -367,7 +367,7 @@ void (float update) Menu_Class = {
         Status_Print(self, "Your team can only be civilians\n");
     }
     else if (plasmaclass) {
-        Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_plasma, s_spy, s_engineer, s_randompc);
+        Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_plasma);
     }
     else
     {

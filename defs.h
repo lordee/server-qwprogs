@@ -310,7 +310,7 @@
 #define PC_PYRO			7
 #define PC_SPY			8
 #define PC_ENGINEER		9
-#define PC_PLASMA		7
+#define PC_PLASMA		10
 
 // Insert new class definitions here
 
