@@ -177,13 +177,6 @@ float () UserCmd =
             return (1);
         }
         else if (argv_mvdsv(0) == "map") {
-            if (self.is_admin) {
-                if (clanbattle == 1 && !(cb_prematch)) {
-                    sprint(self, 2, "Clan Battle in progress....\n");
-                    self.impulse = 0;
-                    return (1);
-                }
-            }
             if (arg_num == 2) {
                 bprint(2, self.netname);
                 bprint(2, " Has changed the map to ");
