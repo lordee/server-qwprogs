@@ -287,6 +287,7 @@ void (entity targ, entity inflictor, entity attacker,
     self = oldself;
 };
 
+void StatTrackerDamage(entity targ, entity inflictor, entity attacker, float damage);
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage = {
     local vector dir;
@@ -540,6 +541,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         targ.armorvalue = 0;
     }
 
+    StatTrackerDamage(targ, inflictor, attacker, take);
     if (targ.health <= 0) {
 
         if ((inflictor.classname == "detpack")

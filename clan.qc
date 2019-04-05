@@ -145,7 +145,7 @@ void () StartMatch =
         }
     }
 };
-
+void StatTrackerStart();
 void () PreMatch_Think = {
     local entity p;
     local string num, tmp;
@@ -201,6 +201,7 @@ void () PreMatch_Think = {
             is_countdown = 1;
             lightstyle(0, "e");
 
+            StatTrackerStart();
             if (stof(infokey(world, "demo_auto_left")) > 0) {
                 if (infokey(world, "serverdemo") == "on") {
                     calltimeofday();

@@ -33,12 +33,22 @@ float statTrackerRequestID;
 // TODO maybe change to json at some point with sent/unsent arrays/retry
 string StatTrackerBuildPostData(string postData, string name, string value)
 {
-    return strcat(postData, "&", name, "=", value);
+    if (strlen(postData))
+    {
+        postData = strcat(postData, "&", name, "=", value);
+    }
+    else
+    {
+        postData = strcat(name, "=", value);
+    }
+    
+    return postData;
 }
 
 void StatTrackerPostData(string url, float reqID, string postData)
 {
-    uri_post(url, reqID, "application/x-www-form-urlencoded", uri_escape(postData));
+    //uri_post(url, reqID, "application/x-www-form-urlencoded", uri_escape(postData));
+    dprint(strcat(postData,"\n"));
     // globals for now because i hate myself
     statTrackerRequestID = statTrackerRequestID + 1;
 }
@@ -69,6 +79,7 @@ void StatTrackerDamage(entity targ, entity inflictor, entity attacker, float dam
     }
     postData = StatTrackerBuildPostData(postData, "damage", ftos(damage));
     
+    StatTrackerPostData(statTrackerURL, statTrackerRequestID, postData);
 }
 
 

@@ -96,9 +96,6 @@ void () QuadRoundThink = {
                 st = infokey(world, "round_delay_time");
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
-				
-
-//			lightstyle (0, "e");
 
 			self.think = QuadRoundOver;
 			self.nextthink = (time + 0.1);
