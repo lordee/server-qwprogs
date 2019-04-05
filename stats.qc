@@ -27,24 +27,62 @@ time
 
 */
 
-// TODO maybe change to json at some point
-void StatTrackerBuildPostData(string postData, string name, string value)
+string statTrackerURL;
+float statTrackerRequestID;
+
+// TODO maybe change to json at some point with sent/unsent arrays/retry
+string StatTrackerBuildPostData(string postData, string name, string value)
 {
     return strcat(postData, "&", name, "=", value);
 }
 
-void StatTrackerPostData(entity st, string postData)
+void StatTrackerPostData(string url, float reqID, string postData)
 {
-    uri_post(st.url, st.reqID, "application/x-www-form-urlencoded", postData);
-    st.reqID = st.reqID + 1;
+    uri_post(url, reqID, "application/x-www-form-urlencoded", uri_escape(postData));
+    // globals for now because i hate myself
+    statTrackerRequestID = statTrackerRequestID + 1;
 }
 
-void StatTrackerRegisterGame(entity st)
+
+void StatTrackerDamage(entity targ, entity inflictor, entity attacker, float damage)
+{
+    string postData;
+    float postTime = time;
+    postData = StatTrackerBuildPostData(postData, "time", ftos(postTime));
+    postData = StatTrackerBuildPostData(postData, "transtype", "Damage");
+    postData = StatTrackerBuildPostData(postData, "targ.classname", targ.classname);
+    if (targ.netname)
+    {
+        postData = StatTrackerBuildPostData(postData, "targ.netname", targ.netname);
+    }
+    if ((targ.classname == "building_sentrygun")
+        || (targ.classname == "building_dispenser"))
+    {
+        postData = StatTrackerBuildPostData(postData, "targ.owner", targ.real_owner.netname);
+    }
+    postData = StatTrackerBuildPostData(postData, "inflictor.classname", inflictor.classname);
+
+    postData = StatTrackerBuildPostData(postData, "attacker.classname", attacker.classname);
+    if (attacker.netname)
+    {
+        postData = StatTrackerBuildPostData(postData, "attacker.netname", attacker.netname);
+    }
+    postData = StatTrackerBuildPostData(postData, "damage", ftos(damage));
+    
+}
+
+
+void StatTrackerRegisterGame(string url, float reqID)
 {
     string postData;
     postData = StatTrackerBuildPostData(postData, "time", ftos(time));
     postData = StatTrackerBuildPostData(postData, "transtype", "RegisterGame");
-    postData = StatTrackerBuildPostData(postData, "servername", );
+    string hn = infokey(world, "hostname");
+    if (hn)
+    {
+        postData = StatTrackerBuildPostData(postData, "servername", hn);
+    }
+    
     postData = StatTrackerBuildPostData(postData, "mapname", mapname);
     
     // team names
@@ -53,93 +91,49 @@ void StatTrackerRegisterGame(entity st)
         postData = StatTrackerBuildPostData(postData, strcat("team", ftos(i)), GetTeamName(i));
     }
 
-    StatTrackerPostData(st, postData);
+    StatTrackerPostData(url, reqID, postData);
 
     // players
-    // TODO - spectators etc?
     entity p;
     p = find(world, classname, "player");
     while (p)
     {
         postData = "";
         postData = StatTrackerBuildPostData(postData, "time", ftos(time));
-        postData = StatTrackerBuildPostData(postData, "transid", st.transid); // TODO is this materially diff to reqid?
-        st.transid = st.transid + 1;
         postData = StatTrackerBuildPostData(postData, "transtype", "RegisterPlayer");
         postData = StatTrackerBuildPostData(postData, "name", p.netname);
         postData = StatTrackerBuildPostData(postData, "playerid", ftos(p.tf_id));
         postData = StatTrackerBuildPostData(postData, "team", ftos(p.team_no));
         postData = StatTrackerBuildPostData(postData, "class", TeamFortress_GetClassName(p.playerclass));
 
-        // TODO add transaction to sent pile
-
-
-        StatTrackerPostData(st, postData);
+        StatTrackerPostData(url, reqID, postData);
         p = find(p, classname, "player");
     }
 }
 
 void(float reqID, float responseCode, string resourceBody) URI_Get_Callback = {
-    if (reqID == 1)
+    if (responseCode != 200)
     {
-        if (responseCode == 200)
-        {
-            // got a response, now make ent to submit
-            string url = CF_GetSetting("stattracker_url", "stu", "http://localhost:80");
-            float statInterval = stof(CF_GetSetting("stattracker_interval", "sti", "5"));
-            
-            entity st = spawn();
-            st.classname = "stattracker";
-            st.think = StatTrackerThink;
-            st.nextthink = time + statInterval;
-            st.cnt2 = statInterval;
-            st.url = url; // TODO find a field to use
-            st.reqID = 2; // TODO find a field to use
-            st.transID = 1;
-
-            // register game
-            StatTrackerRegisterGame(st);
-        }
-        else
-        {
-            dprint("Stats server not contactable\n");
-            dprint("Response Code: ", ftos(responseCode), "\n");
-            dprint("Resource Body:\n", resourceBody,"\n");
-        }
+        dprint("Stats server not contactable\n");
+        dprint("Response Code: ", ftos(responseCode), "\n");
+        dprint("Resource Body:\n", resourceBody,"\n");
     }
     else
     {
-        if (responseCode != 200)
-        {
-            dprint("Stats server error\n");
-            dprint("Response Code: ", ftos(responseCode), "\n");
-            dprint("Resource Body:\n", resourceBody,"\n");
-
-            // TODO put ids back in unsent pile
-        }
+        
     }
-}
-
-void StatTrackerThink() 
-{
-    self.nextthink = time + self.cnt2;
-    // build formdata
-    string postData;
-
-    // TODO should we worry about post size?  Maybe if people actually played
-
-    // TODO put ids in sent pile
-
-    // submit
-    StatTrackerPostData(self, postData);
+    
 }
 
 void StatTrackerStart() 
 {
     // TODO - test for settings to indicate if we track for all games etc (quad, clan, pub)
-    string url = CF_GetSetting("stattracker_url", "stu", "http://localhost:80");
-    string postData = "start=true";
+    statTrackerURL = infokey(world, "stattracker_url");
+    if (!statTrackerURL)
+    {
+        statTrackerURL = "http://localhost:80";
+    }
+    statTrackerRequestID = 1;
 
-    // test if we can get a response from server
-    uri_post(url, 1, "application/x-www-form-urlencoded", postData);
+    StatTrackerRegisterGame(statTrackerURL, statTrackerRequestID);
 }
