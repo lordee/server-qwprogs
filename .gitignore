@@ -6,3 +6,5 @@
 fteqcc64
 .vscode/tasks.json
 .gitignore
+mmap_address.bin
+*.ipch

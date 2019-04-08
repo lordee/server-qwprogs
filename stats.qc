@@ -30,22 +30,7 @@ time
 string statTrackerURL;
 float statTrackerRequestID;
 
-// TODO maybe change to json at some point with sent/unsent arrays/retry
-string StatTrackerBuildPostData(string postData, string name, string value)
-{
-    if (strlen(postData))
-    {
-        postData = strcat(postData, "&", name, "=", value);
-    }
-    else
-    {
-        postData = strcat(name, "=", value);
-    }
-    
-    return postData;
-}
-
-void StatTrackerPostData(string url, float reqID, string postData)
+void StatTrackerPostData(string postData)
 {
     //uri_post(url, reqID, "application/x-www-form-urlencoded", uri_escape(postData));
     dprint(strcat(postData,"\n"));
@@ -53,33 +38,144 @@ void StatTrackerPostData(string url, float reqID, string postData)
     statTrackerRequestID = statTrackerRequestID + 1;
 }
 
-
-void StatTrackerDamage(entity targ, entity inflictor, entity attacker, float damage)
+void StatTrackerChangeClass(entity player, float previous, float next)
 {
-    string postData;
-    float postTime = time;
-    postData = StatTrackerBuildPostData(postData, "time", ftos(postTime));
-    postData = StatTrackerBuildPostData(postData, "transtype", "Damage");
-    postData = StatTrackerBuildPostData(postData, "targ.classname", targ.classname);
-    if (targ.netname)
-    {
-        postData = StatTrackerBuildPostData(postData, "targ.netname", targ.netname);
-    }
-    if ((targ.classname == "building_sentrygun")
-        || (targ.classname == "building_dispenser"))
-    {
-        postData = StatTrackerBuildPostData(postData, "targ.owner", targ.real_owner.netname);
-    }
-    postData = StatTrackerBuildPostData(postData, "inflictor.classname", inflictor.classname);
+	if (canLog == 0)
+		return;
 
-    postData = StatTrackerBuildPostData(postData, "attacker.classname", attacker.classname);
-    if (attacker.netname)
-    {
-        postData = StatTrackerBuildPostData(postData, "attacker.netname", attacker.netname);
-    }
-    postData = StatTrackerBuildPostData(postData, "damage", ftos(damage));
-    
-    StatTrackerPostData(statTrackerURL, statTrackerRequestID, postData);
+    float timeplayed;
+    timeplayed = gametime - player.classtime;
+
+	local string event;
+	event = sprintf(",\n{\"type\": \"changeClass\", \"player\": \"%s\", \"previousClass\": %s, \"nextClass\": %s, \"team\": %s, \"timePlayed\": %s, \"time\": %s, \"gameTimeStamp\": %s}",
+							player.netname,
+							ftos(previous),
+							ftos(next),
+							ftos(player.team_no),
+							ftos(timeplayed),
+							ftos(gametime),
+							timemillis()
+							);
+	StatTrackerPostData(event);
+}
+
+void StatTrackerDamage(entity target, entity inflictor, entity attacker, float damage)
+{
+    if (canLog == 0)
+		return;
+
+	local string event;
+	local string part1;
+	local string part2;
+	local string damageKind;
+	local string attackername;
+	local string targetname;
+	local string inflictorId;
+
+	attackername = attacker.netname;
+	targetname = target.netname;
+	if (attacker == target)
+		damageKind = "self";
+	else if (attacker.team_no == target.team_no)
+		damageKind = "team";
+	else
+		damageKind = "enemy";
+
+	if (inflictor.classname == "player") 
+		inflictorId = GetWeaponName(attacker.current_weapon);
+	else {
+		inflictorId = inflictor.classname;
+		if ((inflictor.classname == "spike") && (attacker.playerclass == 3)) {
+			inflictorId = "nailgrenspike";
+		}
+		else if ((inflictor.classname == "spike") && (attacker.playerclass == 5)) {
+			inflictorId = "superspike";
+		}
+		if (inflictorId == "worldspawn")
+			attackername = "world";
+		else if (inflictorId == "building_sentrygun") {
+			attackername = attacker.real_owner.netname;
+			if (damageKind == "damageTeam")
+				return;
+		}
+		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
+			inflictorId = inflictor.grenadename;
+	}
+
+	if (target.netname != "") {
+		part1 = sprintf(",\n{\"type\": \"damage\", \"kind\": \"%s\", \"attacker\": \"%s\", \"attackerClass\": %s, \"attackerTeam\": %s, \"target\": \"%s\", \"targetClass\": %s, \"targetTeam\": %s, ",
+						damageKind, 
+						attackername, 
+					   	ftos(attacker.playerclass), 
+					   	ftos(attacker.team_no), 
+					   	target.netname, 
+					   	ftos(target.playerclass), 
+					   	ftos(target.team_no));
+		part2 = sprintf("\"inflictor\": \"%s\", \"damage\": %s, \"time\": %s, \"gameTimeStamp\": %s}", 
+						inflictorId,
+						ftos(damage),
+						ftos(gametime)
+						);
+
+		event = strcat(part1, part2);
+		StatTrackerPostData(event)
+	}
+}
+
+void StatTrackerKill(entity attacker, entity target, entity inflictor)
+{
+	if (canLog == 0)
+		return;
+
+	if ((target.classname != "player") && (target.classname != "building_sentrygun"))
+		return;
+	
+	local string killKind;
+	local string attackername;
+	local string targetname;
+	local string inflictorId;
+
+	attackername = attacker.netname;
+	targetname = target.netname;
+	if (attacker == target)
+		killKind = "self";
+	else if (attacker.team_no == target.team_no)
+		killKind = "team";
+	else
+		killKind = "enemy";
+
+	if (inflictor.classname == "player") 
+		inflictorId = GetWeaponName(attacker.current_weapon);
+	else {
+		inflictorId = inflictor.classname;
+		if (inflictorId == "worldspawn")
+			attackername = "world";
+		else if (inflictorId == "building_sentrygun")
+			attackername = attacker.real_owner.netname;
+		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
+			inflictorId = inflictor.grenadename;
+	}
+
+	local string event;
+	local string part1;
+	local string part2;
+
+	part1 = sprintf(",\n{\"type\": \"kill\", \"kind\": \"%s\", \"attacker\": \"%s\", \"attackerClass\": %s, \"attackerTeam\": %s, \"target\": \"%s\", \"targetClass\": %s, \"targetTeam\": %s, ",
+					killKind,
+					attackername, 
+				   	ftos(attacker.playerclass), 
+				   	ftos(attacker.team_no), 
+				   	targetname, 
+				   	ftos(target.playerclass), 
+				   	ftos(target.team_no));
+	part2 = sprintf("\"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": %s}", 
+					inflictorId,					
+					ftos(gametime),
+					timemillis()
+					);
+
+	event = strcat(part1, part2);
+	StatTrackerPostData(event)
 }
 
 

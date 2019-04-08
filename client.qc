@@ -1228,6 +1228,7 @@ void () PutClientInServer = {
         }
     }
     if ((deathmatch == 3) && (self.nextpc != 0)) {
+        StatTrackerChangeClass(self, self.playerclass, self.nextpc);
         self.playerclass = self.nextpc;
         self.nextpc = 0;
         if (self.playerclass == PC_RANDOM)
@@ -1247,6 +1248,7 @@ void () PutClientInServer = {
                || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
             self.playerclass = 1 + floor(random() * (10 - 1));
         }
+        StatTrackerChangeClass(self, oldclass, self.playerclass);
         self.tfstate = TFSTATE_RANDOMPC;
         TeamFortress_ExecClassScript(self);
     } else
@@ -2096,6 +2098,7 @@ void () ClientDisconnect = {
 
     fr = rint(self.frags);
     st = ftos(fr);
+    StatTrackerChangeClass(self, self.playerclass, PC_UNDEFINED);
     bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
     sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
