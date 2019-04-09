@@ -964,6 +964,7 @@ void () W_FireAssaultCannon = {
         FireBullets(5, dir, '0.075 0.075 0');
     else
         FireBullets(5, dir, '0.15 0.15 0');
+    StatTrackerAttack(self);
 };
 
 void (entity pe_flame) CF_ExtinguishFlame = {
@@ -1994,6 +1995,8 @@ void () W_Attack = {
         W_FireLaser();
         Attack_Finished(0.4);
     }
+    if (self.current_weapon != WEAP_ASSAULT_CANNON)
+        StatTrackerAttack(self);
 };
 
 float (entity pl) WeaponReady = {

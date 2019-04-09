@@ -66,6 +66,9 @@ void () StartMatch =
 
     lightstyle(0, "m");
     bprint(2, "MATCH BEGINS NOW\n");
+    gametime = 0;
+	canLog = 1;
+	StatTrackerGameStart();
 
     team4score = 0;
     team3score = 0;
@@ -87,6 +90,7 @@ void () StartMatch =
         setspawnparms(self);
         if (!quadmode)
             PutClientInServer();
+        StatTrackerPlayerStart(self);
         self = oldself;
         te = find(te, classname, "player");
     }

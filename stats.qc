@@ -38,6 +38,110 @@ void StatTrackerPostData(string postData)
     statTrackerRequestID = statTrackerRequestID + 1;
 }
 
+void StatTrackerPlayerStart(entity player)
+{
+ 	if (canLog == 0)
+		return;
+
+	local string event;
+	event = sprintf(",\n{\"type\": \"playerStart\", \"player\": \"%s\", \"classtime\": %s, \"time\": %s, \"gameTimeStamp\": %s}", player.netname, ftos(player.classtime), ftos(gametime), ftos(time));
+	StatTrackerPostData(event);
+}
+
+void StatTrackerGoal(entity player)
+{
+	if (canLog == 0)
+		return;
+	local string event;
+	event = sprintf(",\n{\"type\": \"goal\", \"attacker\": \"%s\", \"time\": %s, \"gameTimeStamp\": %s}", player.netname, ftos(gametime), ftos(time));
+	StatTrackerPostData(event);
+}
+
+void StatTrackerFumble(entity player)
+{
+	if (canLog == 0)
+		return;
+	local string event;
+	event = sprintf(",\n{\"type\": \"fumble\", \"attacker\": \"%s\", \"time\": %s, \"gameTimeStamp\": %s}", player.netname, ftos(gametime), ftos(time));
+	StatTrackerPostData(event);
+}
+
+// TODO this isn't used anywhere -- map end, map change, quad/clan end
+void  StatTrackerGameEnd()
+{
+	if (canLog == 0)
+		return;
+	local string event;
+	event = sprintf(",\n{\"type\": \"gameEnd\", \"time\": %s, \"gameTimeStamp\": %s}", ftos(gametime), ftos(time));
+	StatTrackerPostData(event);
+}
+// TODO this isn't used anywhere
+void () StatTrackerTeamScores = {
+	local float win_score = 0;
+	local float winning_team = 0;
+
+	if (team1score > win_score) {
+		win_score = team1score;
+		winning_team = 1;
+	}
+	
+	if (team2score > win_score) {
+		win_score = team2score;
+		winning_team = 2;
+	}
+	else if (team2score == win_score) {
+		winning_team = 0;
+	}
+
+
+	if (team3score > win_score) {
+		win_score = team3score;
+		winning_team = 3;
+	}
+	else if (team3score == win_score) {
+		winning_team = 0;
+	}
+
+	if (team4score > win_score) {
+		win_score = team4score;
+		winning_team = 4;
+	}
+	else if (team4score == win_score) {
+		winning_team = 0;
+	}
+
+	local string teamscores;
+	teamscores = sprintf("\"team1Score\": %s", ftos(team1score));
+	if (number_of_teams > 1)
+		teamscores = strcat(teamscores, sprintf(", \"team2Score\": %s", ftos(team2score)));
+	if (number_of_teams > 2)
+		teamscores = strcat(teamscores, sprintf(", \"team3Score\": %s", ftos(team3score)));
+	if (number_of_teams > 3)
+		teamscores = strcat(teamscores, sprintf(", \"team4Score\": %s", ftos(team4score)));
+
+	local string teamnames;
+	teamnames = sprintf("\"team1Name\": \"%s\"", GetTeamName(1));
+	if (number_of_teams > 1)
+		teamnames = strcat(teamnames, sprintf(", \"team2Name\": \"%s\"", GetTeamName(2)));
+	if (number_of_teams > 2)
+		teamnames = strcat(teamnames, sprintf(", \"team3Name\": \"%s\"", GetTeamName(3)));
+	if (number_of_teams > 3)
+		teamnames = strcat(teamnames, sprintf(", \"team4Name\": \"%s\"", GetTeamName(4)));
+
+	local string event;
+	event = sprintf(",\n{\"type\": \"teamScores\", %s, %s, \"winningTeam\": %s, \"time\": %s, \"gameTimeStamp\": %s}", teamscores, teamnames, ftos(winning_team), ftos(gametime), ftos(time));
+	StatTrackerPostData(event);
+}
+
+void StatTrackerAttack(entity attacker)
+{
+	if (canLog == 0)
+		return;
+	local string event;
+	event = sprintf(",\n{\"type\": \"attack\", \"attacker\": \"%s\", \"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": %s}", attacker.netname, GetWeaponName(attacker.current_weapon), ftos(gametime), ftos(time));
+	StatTrackerPostData(event);
+}
+
 void StatTrackerChangeClass(entity player, float previous, float next)
 {
 	if (canLog == 0)
@@ -54,7 +158,7 @@ void StatTrackerChangeClass(entity player, float previous, float next)
 							ftos(player.team_no),
 							ftos(timeplayed),
 							ftos(gametime),
-							timemillis()
+							ftos(time)
 							);
 	StatTrackerPostData(event);
 }
@@ -114,7 +218,8 @@ void StatTrackerDamage(entity target, entity inflictor, entity attacker, float d
 		part2 = sprintf("\"inflictor\": \"%s\", \"damage\": %s, \"time\": %s, \"gameTimeStamp\": %s}", 
 						inflictorId,
 						ftos(damage),
-						ftos(gametime)
+						ftos(gametime),
+						ftos(time)
 						);
 
 		event = strcat(part1, part2);
@@ -171,14 +276,51 @@ void StatTrackerKill(entity attacker, entity target, entity inflictor)
 	part2 = sprintf("\"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": %s}", 
 					inflictorId,					
 					ftos(gametime),
-					timemillis()
+					time
 					);
 
 	event = strcat(part1, part2);
 	StatTrackerPostData(event)
 }
 
+void MapEndSequence()
+{
+	local entity player;
+	player = find (world, classname, "player");	
+	while (player) 
+	{
+		if (player.playerclass != 0) {
+			local float timeplayed = gametime - player.classtime;
+			LogEventChangeClass(player, player.playerclass, 0, timeplayed);
+			player.classtime = gametime;
+		}
+		player = find (player, classname, "player");
+	}
+	LogEventTeamScores();
+	LogEventGameEnd();
+	canLog = 0;
+}
 
+void StatTrackerGameStart()
+{
+ 	if (canLog == 0)
+		return;
+	local string event;
+	local entity player;
+	local float numplayers;
+	player = find (world, classname, "player");	
+
+	while (player) 
+	{
+		numplayers++;
+		player = find (player, classname, "player");
+	}
+
+	event = sprintf("{\"type\": \"gameStart\", \"map\": \"%s\", \"numPlayers\": %s, \"numTeams\": %s, \"time\": %s, \"gameTimeStamp\": %s}", mapname, ftos(numplayers), ftos(number_of_teams), ftos(gametime), time);
+	StatTrackerPostData(event);
+}
+
+// TODO this isn't used, we want to json it and change when it's called/integrate with gamestart
 void StatTrackerRegisterGame(string url, float reqID)
 {
     string postData;
@@ -198,7 +340,7 @@ void StatTrackerRegisterGame(string url, float reqID)
         postData = StatTrackerBuildPostData(postData, strcat("team", ftos(i)), GetTeamName(i));
     }
 
-    StatTrackerPostData(url, reqID, postData);
+    StatTrackerPostData(postData);
 
     // players
     entity p;

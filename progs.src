@@ -6,6 +6,7 @@ q3defs.qc
 debug.qc
 status.qc
 functions.qc
+stats.qc
 menu.qc
 vote.qc
 help.qc
@@ -48,4 +49,3 @@ actions.qc
 spect.qc
 q3.qc
 mvdsv.qc
-stats.qc
