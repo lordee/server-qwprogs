@@ -602,3 +602,4 @@ float captainmode;
 .float captain;
 float canLog;
 .float classtime;
+.string grenadename;

@@ -3399,3 +3399,50 @@ void () RemoveGrenade = {
         dremove(self);
     }
 };
+
+string GetWeaponName(float code)
+{
+    switch (code)
+    {
+        case WEAP_HOOK:
+            return "hook";
+        case WEAP_MEDIKIT:
+            return "medikit";
+        case WEAP_SPANNER:
+            return "spanner";
+        case WEAP_AXE:
+            return "axe";
+        case WEAP_SNIPER_RIFLE:
+            return "sniperrifle";
+        case WEAP_AUTO_RIFLE:
+            return "autorifle";
+        case WEAP_SHOTGUN:
+            return "shotgun";
+        case WEAP_SUPER_SHOTGUN:
+            return "supershotgun";
+        case WEAP_NAILGUN:
+            return "nailgun";
+        case WEAP_SUPER_NAILGUN:
+            return "supernailgun";
+        case WEAP_GRENADE_LAUNCHER:
+            return "grenadelauncher";
+        case WEAP_FLAMETHROWER:
+            return "flamethrower";
+        case WEAP_ROCKET_LAUNCHER:
+            return "rocketlauncher";
+        case WEAP_INCENDIARY:
+            return "incendiary";
+        case WEAP_ASSAULT_CANNON:
+            return "assaultcannon";
+        case WEAP_LIGHTNING:
+            return "lightning";
+        case WEAP_TRANQ:
+            return "tranquilizer";
+        case WEAP_LASER:
+            return "railgun";
+        case WEAP_DETPACK:
+            return "detpack";
+        default:
+            return "undefined";
+	}
+}

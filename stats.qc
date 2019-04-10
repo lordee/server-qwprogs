@@ -26,6 +26,7 @@ time
 // chat log?
 
 */
+string GetWeaponName(float code);
 
 string statTrackerURL;
 float statTrackerRequestID;
@@ -76,7 +77,10 @@ void  StatTrackerGameEnd()
 	StatTrackerPostData(event);
 }
 // TODO this isn't used anywhere
-void () StatTrackerTeamScores = {
+string GetTeamName(float team_no);
+
+void StatTrackerTeamScores()
+{
 	local float win_score = 0;
 	local float winning_team = 0;
 
@@ -92,7 +96,6 @@ void () StatTrackerTeamScores = {
 	else if (team2score == win_score) {
 		winning_team = 0;
 	}
-
 
 	if (team3score > win_score) {
 		win_score = team3score;
@@ -223,7 +226,7 @@ void StatTrackerDamage(entity target, entity inflictor, entity attacker, float d
 						);
 
 		event = strcat(part1, part2);
-		StatTrackerPostData(event)
+		StatTrackerPostData(event);
 	}
 }
 
@@ -276,29 +279,11 @@ void StatTrackerKill(entity attacker, entity target, entity inflictor)
 	part2 = sprintf("\"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": %s}", 
 					inflictorId,					
 					ftos(gametime),
-					time
+					ftos(time)
 					);
 
 	event = strcat(part1, part2);
-	StatTrackerPostData(event)
-}
-
-void MapEndSequence()
-{
-	local entity player;
-	player = find (world, classname, "player");	
-	while (player) 
-	{
-		if (player.playerclass != 0) {
-			local float timeplayed = gametime - player.classtime;
-			LogEventChangeClass(player, player.playerclass, 0, timeplayed);
-			player.classtime = gametime;
-		}
-		player = find (player, classname, "player");
-	}
-	LogEventTeamScores();
-	LogEventGameEnd();
-	canLog = 0;
+	StatTrackerPostData(event);
 }
 
 void StatTrackerGameStart()
@@ -307,7 +292,7 @@ void StatTrackerGameStart()
 		return;
 	local string event;
 	local entity player;
-	local float numplayers;
+	local float numplayers = 0;
 	player = find (world, classname, "player");	
 
 	while (player) 
@@ -316,11 +301,12 @@ void StatTrackerGameStart()
 		player = find (player, classname, "player");
 	}
 
-	event = sprintf("{\"type\": \"gameStart\", \"map\": \"%s\", \"numPlayers\": %s, \"numTeams\": %s, \"time\": %s, \"gameTimeStamp\": %s}", mapname, ftos(numplayers), ftos(number_of_teams), ftos(gametime), time);
+	event = sprintf("{\"type\": \"gameStart\", \"map\": \"%s\", \"numPlayers\": %s, \"numTeams\": %s, \"time\": %s, \"gameTimeStamp\": %s}", mapname, ftos(numplayers), ftos(number_of_teams), ftos(gametime), ftos(time));
 	StatTrackerPostData(event);
 }
 
 // TODO this isn't used, we want to json it and change when it's called/integrate with gamestart
+/*
 void StatTrackerRegisterGame(string url, float reqID)
 {
     string postData;
@@ -359,7 +345,7 @@ void StatTrackerRegisterGame(string url, float reqID)
         p = find(p, classname, "player");
     }
 }
-
+*/
 void(float reqID, float responseCode, string resourceBody) URI_Get_Callback = {
     if (responseCode != 200)
     {
@@ -384,5 +370,23 @@ void StatTrackerStart()
     }
     statTrackerRequestID = 1;
 
-    StatTrackerRegisterGame(statTrackerURL, statTrackerRequestID);
+    //StatTrackerRegisterGame(statTrackerURL, statTrackerRequestID);
+}
+
+// TODO - not used currently
+void MapEndSequence()
+{
+	local entity player;
+	player = find (world, classname, "player");	
+	while (player) 
+	{
+		if (player.playerclass != 0) {
+			StatTrackerChangeClass(player, player.playerclass, PC_UNDEFINED);
+			player.classtime = gametime;
+		}
+		player = find (player, classname, "player");
+	}
+	StatTrackerTeamScores();
+	StatTrackerGameEnd();
+	canLog = 0;
 }
