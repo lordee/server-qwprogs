@@ -735,6 +735,112 @@ void (float damage, vector dir) TraceAttack = {
         puff_count = puff_count + 1;
 };
 
+void AssCanBulletTouch()
+{
+	if (self.voided) return;				// Marked for removal
+    self.voided = TRUE;
+
+	if (pointcontents(self.origin) == CONTENT_SKY) {
+        dremove(self);
+        return;
+    }
+
+	if (other == self.owner) return;			// Touching self, do nothing
+
+    if (other.health)
+    {
+        TF_T_Damage(other, self, self.owner, 8, TF_TD_NOTTEAM,
+                    TF_TD_OTHER);
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_BLOOD);
+        WriteByte(MSG_MULTICAST, 1);
+        WriteCoord(MSG_MULTICAST, self.origin_x);
+        WriteCoord(MSG_MULTICAST, self.origin_y);
+        WriteCoord(MSG_MULTICAST, self.origin_z);
+        multicast(self.origin, MULTICAST_PVS);
+    }
+    else
+    {
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_GUNSHOT);
+        WriteByte(MSG_MULTICAST, 1);
+        WriteCoord(MSG_MULTICAST, self.origin_x);
+        WriteCoord(MSG_MULTICAST, self.origin_y);
+        WriteCoord(MSG_MULTICAST, self.origin_z);
+        multicast(self.origin, MULTICAST_PVS);
+    }
+
+    dremove(self);
+};
+
+//======================================================================
+// Vector randomizer, used mostly for avelocity setups
+
+vector(float base, float rndmix, float plusminus) vecrand =
+{
+	local vector vecmix;
+	if (plusminus) {
+		vecmix_x = base + crandom() * rndmix; 
+		vecmix_y = base + crandom() * rndmix; 
+		vecmix_z = base + crandom() * rndmix; 
+	}
+	else {
+		vecmix_x = base + random() * rndmix; 
+		vecmix_y = base + random() * rndmix; 
+		vecmix_z = base + random() * rndmix; 
+	}
+	return vecmix;
+};
+
+void LaunchAssCan(vector org, vector dir, float proj_speed)
+{
+    newmis = spawn();
+	newmis.owner = self;
+	newmis.classname = "proj_bullet";	// obj name, not really used anymore
+	
+    newmis.movetype = MOVETYPE_FLY;		// Small collision
+	
+	newmis.solid = SOLID_BBOX;
+	newmis.touch = AssCanBulletTouch;					// touch function
+	newmis.waitmin = 0;								// Touch function active
+
+	newmis.think = SUB_Remove;
+	newmis.nextthink = time + 5;	// Stop projectile going forever
+
+	newmis.mdl = MODEL_PROJ_DIAM2;
+	setmodel(newmis, newmis.mdl);				// Diamond model
+	newmis.frame = random()*15;					// Full range of sizes
+	newmis.skin = 16 + random()*7;				// Bright colours
+
+	newmis.velocity = dir * proj_speed;			// Constant speed multiplier
+	newmis.angles = vectoangles(dir);			// Create direction angle
+	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);	// Zero size
+	setorigin (newmis, org);					// Move to starting position
+
+	newmis.avelocity = vecrand(100,200,FALSE);
+}
+
+void FireAssCan (float shotcount, vector dir, vector spread)
+{
+    local	vector bullet_dir, spread_dir;
+	local float bullet_speed, var_speed;
+
+    makevectors(self.v_angle);
+    // Infront of player model and down towards gun
+    bullet_speed = 5000;
+    
+    // Either straight line or auto aim assist (builtin function 44)
+    bullet_dir = normalize(v_forward * bullet_speed);
+
+    while (shotcount > 0) {
+		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
+		spread_dir = bullet_dir + (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
+		LaunchAssCan(self.origin, spread_dir, var_speed);
+
+		shotcount = shotcount - 1;
+	}
+}
+
 void (float shotcount, vector dir, vector spread) FireBullets = {
     local vector direction;
     local vector src;
@@ -956,6 +1062,7 @@ void () W_FireAssaultCannon = {
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
 
+    /*
     if (cannon_accuracy == 1)
         FireBullets(5, dir, '0 0 0');
     else if (cannon_accuracy == 2)
@@ -963,7 +1070,9 @@ void () W_FireAssaultCannon = {
     else if (vlen(self.velocity) < 50)
         FireBullets(5, dir, '0.075 0.075 0');
     else
-        FireBullets(5, dir, '0.15 0.15 0');
+        FireBullets(5, dir, '0.15 0.15 0');*/
+
+    FireAssCan(5, dir, '0.04 0.04 0');
 };
 
 void (entity pe_flame) CF_ExtinguishFlame = {
