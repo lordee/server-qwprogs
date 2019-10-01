@@ -167,6 +167,8 @@ void () worldspawn = {
         localcmd(".cfg\n");
     }
 
+    StatTrackerGameStatusChange(ST_GAMESTART);
+
     Vote_Reset();
 
     W_Precache();

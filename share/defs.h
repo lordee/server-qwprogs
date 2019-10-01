@@ -1363,3 +1363,7 @@
 // stats
 // first 32 are reserved
 #define STAT_TEAMNO    33
+
+
+// statistics
+#define ST_GAMESTART	1

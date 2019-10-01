@@ -7,9 +7,11 @@ defs.qc
 ../share/common_helpers.qc
 qw.qc
 q3defs.qc
+stats.qc
 debug.qc
 status.qc
 functions.qc
+
 menu.qc
 vote.qc
 help.qc
