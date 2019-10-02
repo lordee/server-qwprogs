@@ -166,8 +166,8 @@ void () worldspawn = {
         localcmd(mapname);
         localcmd(".cfg\n");
     }
-
-    StatTrackerGameStatusChange(ST_GAMESTART);
+    StatTracker = spawn(FO_StatTracker);
+    StatTracker.GameStatusChange(ST_GAMESTART); // this is so much better
 
     Vote_Reset();
 

@@ -7,7 +7,7 @@ defs.qc
 ../share/common_helpers.qc
 qw.qc
 q3defs.qc
-stats.qc
+stattracker.qc
 debug.qc
 status.qc
 functions.qc
