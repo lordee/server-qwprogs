@@ -62,19 +62,20 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     uri_post(url, this.RequestID, "application/json", data);
 
     this.RequestID = this.RequestID + 1;
-    //dprint(strcat(url,"\n"));
-    //dprint(strcat(data,"\n"));
+    dprint(strcat(url,"\n"));
+    dprint(strcat(data,"\n"));
 }
 
+// todo finish this
 void FO_StatTracker :: BroadcastMessage(float stateType)
 {
     switch (stateType)
     {
         case ST_CHAT:
-
+            dprint("not implemented");
             break;
         case ST_BROADCAST:
-
+            dprint("not implemented");
             break;
     }
 }
@@ -149,7 +150,25 @@ void FO_StatTracker :: GameStateChange(float stateType)
             entity p;
             float loopCount = 0;
             event = strcat(event, ", \"Players\": [");
-            p = find(world, classname, "player")
+            p = find(world, ::classname, "player");
+            while(p)
+            {
+                if (loopCount > 0)
+                {
+                    event = strcat(event, ", ");
+                }
+                loopCount = loopCount + 1;
+
+                event = strcat(event, "\"TF_ID\":", ftos(p.tf_id), "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no), ", \"Class\":", ftos(p.playerclass), "}");
+                p = find(p, ::classname, "player");
+            }
+            event = strcat(event, "]");
+
+            // specs
+            loopCount = 0;
+            event = strcat(event, ", \"Spectators\": [");
+            p = find(world, ::classname, "observer");
+
             while(p)
             {
                 if (loopCount > 0)
@@ -159,25 +178,7 @@ void FO_StatTracker :: GameStateChange(float stateType)
                 loopCount = loopCount + 1;
 
                 event = strcat(event, "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no), ", \"Class\":", ftos(p.playerclass), "}");
-                p = find(p, classname, "player");
-            }
-            event = strcat(event, "]");
-
-            // specs
-            loopCount = 0;
-            event = strcat(event, ", \"Spectators\": [");
-            p = find(world, classname, "observer");
-
-            while(p)
-            {
-                if (loopCount > 0)
-                {
-                    event = strcat(event, ", ");
-                }
-                loopCount = loopCount + 1;
-
-                event = strcat(event, "{\"Name\":\"", p.netname, "\"}");
-                p = find(p, classname, "observer");
+                p = find(p, ::classname, "observer");
             }
             event = strcat(event, "]");
 

@@ -57,6 +57,7 @@ void () MatchThink =
 
 void () StartMatch =
 {
+    StatTracker.GameStateChange(ST_GAMESTART);
     local string st;
     local float f1;
     local float f2;

@@ -167,7 +167,10 @@ void () worldspawn = {
         localcmd(".cfg\n");
     }
     StatTracker = spawn(FO_StatTracker);
-    StatTracker.GameStateChange(ST_GAMESTART); // this is so much better
+
+    clanbattle = CF_GetSetting("c", "clan", "off");
+    if (!clanbattle)
+        StatTracker.GameStateChange(ST_GAMESTART);
 
     Vote_Reset();
 

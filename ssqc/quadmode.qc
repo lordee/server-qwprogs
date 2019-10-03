@@ -1,5 +1,3 @@
-//=-=-=-=-=
-
 float () CheckWinningTeam = {
 	local float win_score = 0;
 	local float winning_team = 0;
@@ -146,7 +144,6 @@ void () QuadRoundBegin = {
 		self = oldself;
 		te = find (te, classname, "player");
 	}
-//	lightstyle (0, "m");
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
  	round_active = 1;
@@ -233,6 +230,8 @@ void () StartQuadRound =
 	local entity gren;
 	local entity p;
 
+	float total_rounds = CF_GetSetting("rounds","rounds","on") + 1;
+
 	lightstyle(0, "m");
 	cb_prematch = 1;
     cease_fire = 0;
@@ -247,6 +246,12 @@ void () StartQuadRound =
 			p.model = string_null;
 		}
 		p = find(p, classname, "player");
+	}
+
+	if (rounds == total_rounds)
+	{
+		// first round about to be played
+		StatTracker.GameStateChange(ST_GAMESTART);
 	}
 
 	if (rounds == 1) {
@@ -287,7 +292,6 @@ void () StartQuadRound =
 	while (te != world) {
 		te2 = self;
 		self = te;
-		//door_go_down();
 		door_go_down_silent();
 		self.think = LinkDoors;
 		self = te2;
@@ -298,7 +302,7 @@ void () StartQuadRound =
 	while (te) {
 		if (te.origin != te.oldorigin) {
 			if (te.owner != world)
-					tfgoalitem_RemoveFromPlayer(te, te.owner, 1);
+				tfgoalitem_RemoveFromPlayer(te, te.owner, 1);
 			oldself = spawn();
 			oldself.enemy = te;
 			oldself.weapon = 3;
@@ -380,7 +384,7 @@ void () StartQuadRound =
 		te.think = QuadRoundBegin;
 		te.nextthink = (time + 0.01);
 	}
-	else {
+	else { // this is last round to be played I think
 		te.think = QuadRoundInit;
 		te.nextthink = (time + 1);
 	}
