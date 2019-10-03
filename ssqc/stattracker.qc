@@ -11,7 +11,7 @@ class FO_StatTracker
     float GameStartReqID; // used to track request id of game init, so we can set gameid
 
     void FO_StatTracker; // constructor
-    virtual void(float statustype) GameStatusChange;
+    virtual void(float statustype) GameStateChange;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -37,12 +37,12 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     //dprint(strcat(data,"\n"));
 }
 
-void FO_StatTracker :: GameStatusChange(float statusType)
+void FO_StatTracker :: GameStateChange(float statusType)
 {
     if (statusType != ST_GAMESTART && this.GameID == 0)
         return;
 
-    string endpoint = "GameStatusChange";
+    string endpoint = "GameStateChange";
     string event = "";
     string serverName = "";
     serverName = infokey(world, "hostname");
@@ -97,9 +97,7 @@ void FO_StatTracker :: GameStatusChange(float statusType)
             }
             event = strcat(event, "]");
 
-            this.PostData(endpoint, event);
-
-            
+            this.PostData(endpoint, event);           
             break;
     }
 }
