@@ -7,7 +7,9 @@ enum
     ST_DISCONNECTED,
     ST_CONNECTED,
     ST_BECAMEPLAYER,
-    ST_BECAMESPECTATOR
+    ST_BECAMESPECTATOR,
+    ST_CHAT,
+    ST_BROADCAST
 };
 
 /*
@@ -37,7 +39,8 @@ class FO_StatTracker
 
     void FO_StatTracker; // constructor
     virtual void(float stateType) GameStateChange;
-    virtual void() PlayerStateChange;
+    virtual void(float stateType) PlayerStateChange;
+    virtual void(float stateType) BroadcastMessage;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -61,6 +64,19 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     this.RequestID = this.RequestID + 1;
     //dprint(strcat(url,"\n"));
     //dprint(strcat(data,"\n"));
+}
+
+void FO_StatTracker :: BroadcastMessage(float stateType)
+{
+    switch (stateType)
+    {
+        case ST_CHAT:
+
+            break;
+        case ST_BROADCAST:
+
+            break;
+    }
 }
 
 void FO_StatTracker :: PlayerStateChange(float stateType)
