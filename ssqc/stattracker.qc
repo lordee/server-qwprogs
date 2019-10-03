@@ -57,11 +57,49 @@ void FO_StatTracker :: GameStatusChange(float statusType)
     switch (statusType)
     {
         case ST_GAMESTART:
+            this.GameStartReqID = this.RequestID;
             eventType = "GameStart";
             event = strcat("\"GameID\": ", ftos(this.GameID), ", \"ServerName\": \"", serverName, "\", \"GameTime\": ", ftos(gameTime), ",");
             event = strcat(event, "\"EventType\": \"", eventType, "\", \"Map\": \"", mapname, "\", \"Initiator\": \"world\"");
-            this.GameStartReqID = this.RequestID;
+            // send player info too
+            entity p;
+            float loopCount = 0;
+            event = strcat(event, ", \"Players\": [");
+            p = find(world, classname, "player")
+            while(p)
+            {
+                if (loopCount > 0)
+                {
+                    event = strcat(event, ", ");
+                }
+                loopCount = loopCount + 1;
+
+                event = strcat(event, "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no), ", \"Class\":", ftos(p.playerclass), "}");
+                p = find(p, classname, "player");
+            }
+            event = strcat(event, "]");
+
+            // specs
+            loopCount = 0;
+            event = strcat(event, ", \"Spectators\": [");
+            p = find(world, classname, "observer");
+
+            while(p)
+            {
+                if (loopCount > 0)
+                {
+                    event = strcat(event, ", ");
+                }
+                loopCount = loopCount + 1;
+
+                event = strcat(event, "{\"Name\":\"", p.netname, "\"}");
+                p = find(p, classname, "observer");
+            }
+            event = strcat(event, "]");
+
             this.PostData(endpoint, event);
+
+            
             break;
     }
 }
