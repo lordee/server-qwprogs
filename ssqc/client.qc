@@ -2319,7 +2319,7 @@ void () PlayerPostThink = {
 void (optional float csqcactive) ClientConnect = {
     local entity te;
     local string st;
-    local float got_one;
+    float tfidset;
 
     stuffcmd(self, "set fortressone 1\n");
 
@@ -2352,8 +2352,8 @@ void (optional float csqcactive) ClientConnect = {
             self.is_admin = FALSE;
     }
 
+    tfidset = 0;
     if (clanbattle && (self.has_disconnected != 1)) {
-        got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
         if ((st != string_null) && (self.tf_id != 0)) {
@@ -2361,7 +2361,7 @@ void (optional float csqcactive) ClientConnect = {
             te = find(world, classname, "ghost");
             while (te) {
                 if (te.tf_id == self.tf_id) {
-                    got_one = 1;
+                    tfidset = 1;
                     TeamFortress_TeamSet(te.team_no);
                     self.frags = te.frags;
                     self.real_frags = te.real_frags;
@@ -2377,21 +2377,24 @@ void (optional float csqcactive) ClientConnect = {
                     te = find(te, classname, "ghost");
             }
         }
-        if (!got_one) {
+        if (!tfidset) {
             if (game_locked && (!cb_prematch)) {
                 sprint(self, PRINT_HIGH,
                        "Closed server. Clan battle in progress.\n");
                 KickCheater(self);
                 return;
             }
-            last_id = last_id + 20 + random() * 10;
-            self.tf_id = rint(random() * 10 + last_id);
-            st = ftos(self.tf_id);
-            stuffcmd(self, "setinfo tf_id ");
-            stuffcmd(self, st);
-            stuffcmd(self, "\n");
-            sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
+    }
+
+    // always apply a tf_id so we can use it in StatTracker (previously clan battles only)
+    if (!tfidset) {
+        last_id = last_id + 20 + random() * 10;
+        self.tf_id = rint(random() * 10 + last_id);
+        st = ftos(self.tf_id);
+        stuffcmd(self, strcat("setinfo tf_id ", st, "\n"));
+        forceinfokey(self, "tf_id", st);
+        sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
     }
     
     entity tfdet = find(world, classname, "info_tfdetect");
