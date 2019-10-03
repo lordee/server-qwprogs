@@ -1,7 +1,31 @@
 enum
 {
-    ST_GAMESTART
+    ST_GAMESTART,
+    ST_CHANGENAME,
+    ST_CHANGETEAM,
+    ST_CHANGECLASS,
+    ST_DISCONNECTED,
+    ST_CONNECTED,
+    ST_BECAMEPLAYER,
+    ST_BECAMESPECTATOR
 };
+
+/*
+// in game stats
+kill
+death
+damage done
+shot fired
+shot hit (damage done)
+touches
+caps
+kill on flag carrier
+time
+
+// chat log?
+
+// infokey tf_id always set, not just clan battles?
+*/
 
 class FO_StatTracker
 {
@@ -9,9 +33,11 @@ class FO_StatTracker
     string URL;
     float GameID;
     float GameStartReqID; // used to track request id of game init, so we can set gameid
+    entity PlayerChange; // can't pass ents as args, so track player here for state change
 
     void FO_StatTracker; // constructor
-    virtual void(float statustype) GameStateChange;
+    virtual void(float stateType) GameStateChange;
+    virtual void() PlayerStateChange;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -37,9 +63,51 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     //dprint(strcat(data,"\n"));
 }
 
-void FO_StatTracker :: GameStateChange(float statusType)
+void FO_StatTracker :: PlayerStateChange(float stateType)
 {
-    if (statusType != ST_GAMESTART && this.GameID == 0)
+    if (this.GameID == 0)
+        return;
+
+    string endpoint = "PlayerStateChange";
+    string event = "";
+    string eventType = "";
+    float gameTime = 0;
+
+    switch (stateType)
+    {
+        case ST_CHANGENAME:
+            eventType = "ChangeName";
+            break;
+        case ST_CHANGETEAM:
+            eventType = "ChangeTeam";
+            break;
+        case ST_CHANGECLASS:
+            eventType = "ChangeClass";
+            break;
+        case ST_DISCONNECTED:
+            eventType = "Disconnected";
+            break;
+        case ST_CONNECTED:
+            eventType = "Connected";
+            break;
+        case ST_BECAMEPLAYER: // TODO implement
+            eventType = "BecamePlayer";
+            break;
+        case ST_BECAMESPECTATOR: // TODO implement
+            eventType = "BecameSpectator";
+            break;
+    }
+
+    event = strcat("\"GameID\":", ftos(this.GameID), "\"GameTime\":", ftos(gameTime), ", \"EventType\": \"", eventType, "\", \"Player\": {");
+    event = strcat(event, "\"TF_ID\":", ftos(this.PlayerChange.tf_id), "\"Name\": \"", this.PlayerChange.netname, "\", \"Team\":", ftos(this.PlayerChange.team_no));
+    event = strcat(event, ", \"Class\":", ftos(this.PlayerChange.playerclass), "}");
+
+    this.PostData(endpoint, event);
+}
+
+void FO_StatTracker :: GameStateChange(float stateType)
+{
+    if (stateType != ST_GAMESTART && this.GameID == 0)
         return;
 
     string endpoint = "GameStateChange";
@@ -54,7 +122,7 @@ void FO_StatTracker :: GameStateChange(float statusType)
         serverName = "unnamed";
     }
 
-    switch (statusType)
+    switch (stateType)
     {
         case ST_GAMESTART:
             this.GameStartReqID = this.RequestID;

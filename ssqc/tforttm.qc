@@ -249,6 +249,8 @@ float (float tno) TeamFortress_TeamSet = {
             TeamFortress_ChangeClass(11);
         }
     }
+    StatTracker.PlayerChange(self);
+    StatTracker.PlayerStateChange(ST_CHANGETEAM);
     return (1);
 };
 

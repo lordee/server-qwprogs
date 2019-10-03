@@ -1576,6 +1576,13 @@ void () PutClientInServer = {
     else {
         W_ChangeWeapon(W_BestWeaponSlot());
     }
+
+    if (self.last_playerclass != self.playerclass)
+    {
+        StatTracker.PlayerChange = self;
+        StatTracker.PlayerStateChange(ST_CHANGECLASS);
+    }
+
     self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
@@ -2386,6 +2393,7 @@ void (optional float csqcactive) ClientConnect = {
             sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
+    
     entity tfdet = find(world, classname, "info_tfdetect");
     if(tfdet) {
         InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
@@ -2404,6 +2412,9 @@ void (optional float csqcactive) ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
+
+    StatTracker.PlayerChange = self;
+    StatTracker.PlayerStateChange(ST_CONNECTED);
 };
 
 void () CountMatchPlayersAndReset = {
@@ -2431,6 +2442,8 @@ void () ClientDisconnect = {
     st = ftos(fr);
     bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
+    StatTracker.PlayerChange = self;
+    StatTracker.PlayerStateChange(ST_DISCONNECTED);
     sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
     RemovePlayerOwnedEnts();
