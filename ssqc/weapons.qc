@@ -1098,6 +1098,7 @@ void () W_FireRocket = {
 
     newmis.weapon = DMSG_ROCKETL;
     newmis.classname = "proj_rocket";
+    newmis.shot_id = GetShotID();
     setmodel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
@@ -1309,6 +1310,7 @@ void () W_FireGrenade = {
     newmis.avelocity = '300 300 300';
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = GrenadeExplode;
+    newmis.shot_id = GetShotID();
     setmodel(newmis, "progs/grenade2.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
@@ -1333,6 +1335,7 @@ void (vector org, vector dir) launch_spike = {
     setmodel(newmis, "progs/spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
+    newmis.shot_id = GetShotID();
 
     newmis.velocity = dir * ng_velocity;
 };
@@ -1949,6 +1952,8 @@ void () W_Attack = {
 
     makevectors(self.v_angle);
     self.show_hostile = time + 1;
+
+    self.shot_id = GetShotID();
 
     if (self.current_weapon == WEAP_AXE) {
         Attack_Finished(0.5);

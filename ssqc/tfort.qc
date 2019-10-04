@@ -1021,6 +1021,7 @@ void () TeamFortress_GrenadePrimed = {
         newmis.avelocity = '300 300 300';
         setmodel(newmis, "progs/hgren2.mdl");
     }
+    newmis.shot_id = GetShotID();
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, user.origin);
     dremove(self);
@@ -2797,6 +2798,7 @@ void () TeamFortress_ExplodePerson = {
         newmis.avelocity = '300 300 300';
         setmodel(newmis, "progs/grenade2.mdl");
     }
+    newmis.shot_id = GetShotID();
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
     if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))

@@ -71,15 +71,35 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(data,"\n"));
 }
 
+float IsCritHit(float weapon, float damage);
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage,
-      float T_flags, float T_AttackType)
+      float damagetypef)
 {
+    if (this.GameID == 0)
+        return;
+    // TODO t_damage calls this but most fields might not be set?
 
+    float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
+    string damagetype = DMSGToString(damagetypef);
+    float shotID = inflictor.shot_id; // player or missile
+
+    // if not in water
+    // calc midheight distnace between targ origin and ground
+    float vheight = ; // vertical height (midairs)
+
+    string event;
+    event = strcat("\"Attacker\": {\"TF_ID\": ", ftos(attacker.tf_id), ", \"ClassName\": \"", attacker.classname, "\", \"Team\":", ftos(attacker.team_no), ", \"Class\":", ftos(attacker.playerclass));
+    event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":", ftos(targ.playerclass));
+    event = strcat(event, "}, \"Inflictor\": \"", damagetype, "\", \"Damage\":", ftos(damage), "\"Shot_ID\":", ftos(shotID));
+    event = strcat(event, , "\"VHeight\":", ftos(vheight))
 }
 
 // todo finish this
 void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7)
 {
+    if (this.GameID == 0)
+        return;
+
     switch (stateType)
     {
         case ST_CHAT:
@@ -90,8 +110,6 @@ void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s,
             break;
     }
 }
-
-
 
 void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
 {

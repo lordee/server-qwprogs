@@ -138,6 +138,34 @@ void (entity targ, entity attacker) Killed = {
     }
 };
 
+float IsCritHit(float weapon, float damage)
+{
+    float isCrit = 0;
+
+    switch (weapon)
+    {
+        case DMSG_ROCKETL:
+            if (damage >= 80)
+                isCrit = 1;
+            break;
+        case DMSG_SSHOTGUN:
+            if (damage >= 40)
+                isCrit = 1;
+            break;
+        case DMSG_GRENADEL:
+            if (damage >= 85)
+                isCrit = 1;
+            break;
+        case DMSG_INCENDIARY:
+            if (damage >= 40)
+                isCrit = 1;
+            break;
+
+    }
+
+    return isCrit;
+}
+
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
 
 	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
@@ -165,20 +193,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
             
             if (hitsound == "1" || hitsound == "2")
             {
-                local float crit;
-
-                if((inflictor.weapon == DMSG_ROCKETL) && (damage >= 80)) {
-                    crit = 1;
-                }
-                if ((inflictor.weapon == DMSG_SSHOTGUN) && (damage >= 40)) {
-                    crit = 1;
-                }
-                if ((inflictor.weapon == DMSG_GRENADEL) && (damage >= 85)) {
-                    crit = 1;
-                }
-                if ((inflictor.weapon == DMSG_INCENDIARY) && (damage >= 40)) {
-                    crit = 1;
-                }
+                float crit = IsCritHit(inflictor.weapon, damage);
                 
                 local float sameteam;
                 sameteam = 0;
@@ -318,6 +333,8 @@ void (entity targ, entity inflictor, entity attacker,
         take = 1;
 
     targ.health = targ.health - take;
+    
+    StatTracker.Damage(targ, inflictor, attacker, damage, deathmsg);
 
     if (targ.armorvalue < 1) {
         targ.armorclass = 0;
@@ -338,6 +355,140 @@ void (entity targ, entity inflictor, entity attacker,
     }
     self = oldself;
 };
+
+string DMSGToString(float dmsg)
+{
+    string msg = "";
+    switch (dmsg)
+    {
+        case DMSG_SHOTGUN:
+            msg = "DMSG_SHOTGUN";
+            break;
+        case DMSG_SSHOTGUN:
+            msg = "DMSG_SSHOTGUN";
+            break;
+        case DMSG_NAILGUN:
+            msg = "DMSG_NAILGUN";
+            break;
+        case DMSG_SNAILGUN:
+            msg = "DMSG_SNAILGUN";
+            break;
+        case DMSG_GRENADEL:
+            msg = "DMSG_GRENADEL";
+            break;
+        case DMSG_ROCKETL:
+            msg = "DMSG_ROCKETL";
+            break;
+        case DMSG_LIGHTNING:
+            msg = "DMSG_LIGHTNING";
+            break;
+        case DMSG_GREN_HAND:
+            msg = "DMSG_GREN_HAND";
+            break;
+        case DMSG_GREN_NAIL:
+            msg = "DMSG_GREN_NAIL";
+            break;
+        case DMSG_GREN_MIRV:
+            msg = "DMSG_GREN_MIRV";
+            break;
+        case DMSG_GREN_PIPE:
+            msg = "DMSG_GREN_PIPE";
+            break;
+        case DMSG_DETPACK:
+            msg = "DMSG_DETPACK";
+            break;
+        case DMSG_BIOWEAPON:
+            msg = "DMSG_BIOWEAPON";
+            break;
+        case DMSG_BIOWEAPON_ATT:
+            msg = "DMSG_BIOWEAPON_ATT";
+            break;
+        case DMSG_FLAME:
+            msg = "DMSG_FLAME";
+            break;
+        case DMSG_DETPACK_DIS:
+            msg = "DMSG_DETPACK_DIS";
+            break;
+        case DMSG_AXE:
+            msg = "DMSG_AXE";
+            break;
+        case DMSG_SNIPERRIFLE:
+            msg = "DMSG_SNIPERRIFLE";
+            break;
+        case DMSG_AUTORIFLE:
+            msg = "DMSG_AUTORIFLE";
+            break;
+        case DMSG_ASSAULTCANNON:
+            msg = "DMSG_ASSAULTCANNON";
+            break;
+        case DMSG_HOOK:
+            msg = "DMSG_HOOK";
+            break;
+        case DMSG_BACKSTAB:
+            msg = "DMSG_BACKSTAB";
+            break;
+        case DMSG_MEDIKIT:
+            msg = "DMSG_MEDIKIT";
+            break;
+        case DMSG_GREN_GAS:
+            msg = "DMSG_GREN_GAS";
+            break;
+        case DMSG_TRANQ:
+            msg = "DMSG_TRANQ";
+            break;
+        case DMSG_LASERBOLT:
+            msg = "DMSG_LASERBOLT";
+            break;
+        case DMSG_SENTRYGUN_BULLET:
+            msg = "DMSG_SENTRYGUN_BULLET";
+            break;
+        case DMSG_SNIPERLEGSHOT:
+            msg = "DMSG_SNIPERLEGSHOT";
+            break;
+        case DMSG_SNIPERHEADSHOT:
+            msg = "DMSG_SNIPERHEADSHOT";
+            break;
+        case DMSG_GREN_EMP:
+            msg = "DMSG_GREN_EMP";
+            break;
+        case DMSG_GREN_EMP_AMMO:
+            msg = "DMSG_GREN_EMP_AMMO";
+            break;
+        case DMSG_SPANNER:
+            msg = "DMSG_SPANNER";
+            break;
+        case DMSG_INCENDIARY:
+            msg = "DMSG_INCENDIARY";
+            break;
+        case DMSG_SENTRYGUN_ROCKET:
+            msg = "DMSG_SENTRYGUN_ROCKET";
+            break;
+        case DMSG_GREN_FLASH:
+            msg = "DMSG_GREN_FLASH";
+            break;
+        case DMSG_TRIGGER:
+            msg = "DMSG_TRIGGER";
+            break;
+        case DMSG_TEAMKILL:
+            msg = "DMSG_TEAMKILL";
+            break;
+        case DMSG_SENTRYGUN_EXPLODE:
+            msg = "DMSG_SENTRYGUN_EXPLODE";
+            break;
+        case DMSG_DISPENSER_EXPLODE:
+            msg = "DMSG_DISPENSER_EXPLODE";
+            break;
+        case DMSG_GREN_PIPE_AIR:
+            msg = "DMSG_GREN_PIPE_AIR";
+            break;
+        case DMSG_GREN_CALTROP:
+            msg = "DMSG_GREN_CALTROP";
+            break;
+        default:
+            msg = strcat("NOT FOUND: ", ftos(dmsg));
+    }
+    return msg;
+}
 
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage = {
@@ -549,6 +700,8 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     if (no_damage == 0)
         targ.health = (targ.health - take);
+
+    StatTracker.Damage(targ, inflictor, attacker, damage, deathmsg);
 
     if ((attacker.classname == "player")
         && ((targ.classname == "player")

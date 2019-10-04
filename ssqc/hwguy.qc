@@ -83,6 +83,7 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	newmis.angles = vectoangles(dir);			// Create direction angle
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);	// Zero size
 	setorigin (newmis, org);					// Move to starting position
+    
 
 	newmis.avelocity = vecrand(100, 200, FALSE);
 }
@@ -101,6 +102,8 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     // Infront of player model and down towards gun
     bullet_speed = PC_HVYWEAP_PROJSPEED;
     bullet_dir = normalize(v_forward * bullet_speed);
+
+    float shotID = GetShotID();
     
     while (shotcount > 0) {       
 		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
@@ -109,6 +112,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
         org = self.origin + '0 0 10' + rand_dir;
 
 		LaunchAssCan(org, spread_dir, var_speed);
+        newmis.shot_id = shotID
 
 		shotcount = shotcount - 1;
 	}
