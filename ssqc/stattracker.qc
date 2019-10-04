@@ -12,6 +12,12 @@ enum
     ST_BROADCAST
 };
 
+void bprint(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) 
+{
+    StatTracker.BroadcastMessage(ST_BROADCAST, msglvl, s, s2, s3, s4, s5, s6, s7);
+    bprint_engine(msglvl, s, s2, s3, s4, s5, s6, s7);
+}
+
 /*
 // in game stats
 kill
@@ -26,7 +32,6 @@ time
 
 // chat log?
 
-// infokey tf_id always set, not just clan battles?
 */
 
 class FO_StatTracker
@@ -67,7 +72,7 @@ void FO_StatTracker :: PostData(string endpoint, string data)
 }
 
 // todo finish this
-void FO_StatTracker :: BroadcastMessage(float stateType)
+void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7)
 {
     switch (stateType)
     {
@@ -79,6 +84,8 @@ void FO_StatTracker :: BroadcastMessage(float stateType)
             break;
     }
 }
+
+
 
 void FO_StatTracker :: PlayerStateChange(float stateType)
 {
