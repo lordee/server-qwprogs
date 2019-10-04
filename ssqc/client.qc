@@ -1579,8 +1579,7 @@ void () PutClientInServer = {
 
     if (self.last_playerclass != self.playerclass)
     {
-        StatTracker.PlayerChange = self;
-        StatTracker.PlayerStateChange(ST_CHANGECLASS);
+        StatTracker.PlayerStateChange(ST_CHANGECLASS, self);
     }
 
     self.last_playerclass = self.playerclass;
@@ -2416,8 +2415,7 @@ void (optional float csqcactive) ClientConnect = {
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 
-    StatTracker.PlayerChange = self;
-    StatTracker.PlayerStateChange(ST_CONNECTED);
+    StatTracker.PlayerStateChange(ST_CONNECTED, self);
 };
 
 void () CountMatchPlayersAndReset = {
@@ -2445,8 +2443,7 @@ void () ClientDisconnect = {
     st = ftos(fr);
     bprint(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
-    StatTracker.PlayerChange = self;
-    StatTracker.PlayerStateChange(ST_DISCONNECTED);
+    StatTracker.PlayerStateChange(ST_DISCONNECTED, self);
     sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
     RemovePlayerOwnedEnts();

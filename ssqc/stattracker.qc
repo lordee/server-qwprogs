@@ -40,12 +40,12 @@ class FO_StatTracker
     string URL;
     float GameID;
     float GameStartReqID; // used to track request id of game init, so we can set gameid
-    entity PlayerChange; // can't pass ents as args, so track player here for state change
 
     void FO_StatTracker; // constructor
     virtual void(float stateType) GameStateChange;
-    virtual void(float stateType) PlayerStateChange;
+    virtual void(float stateType, entity player) PlayerStateChange;
     virtual void(float stateType) BroadcastMessage;
+    virtual void() Damage;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -71,6 +71,12 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(data,"\n"));
 }
 
+void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage,
+      float T_flags, float T_AttackType)
+{
+
+}
+
 // todo finish this
 void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7)
 {
@@ -87,7 +93,7 @@ void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s,
 
 
 
-void FO_StatTracker :: PlayerStateChange(float stateType)
+void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
 {
     if (this.GameID == 0)
         return;
@@ -123,8 +129,8 @@ void FO_StatTracker :: PlayerStateChange(float stateType)
     }
 
     event = strcat("\"GameID\":", ftos(this.GameID), "\"GameTime\":", ftos(gameTime), ", \"EventType\": \"", eventType, "\", \"Player\": {");
-    event = strcat(event, "\"TF_ID\":", ftos(this.PlayerChange.tf_id), "\"Name\": \"", this.PlayerChange.netname, "\", \"Team\":", ftos(this.PlayerChange.team_no));
-    event = strcat(event, ", \"Class\":", ftos(this.PlayerChange.playerclass), "}");
+    event = strcat(event, "\"TF_ID\":", ftos(player.tf_id), "\"Name\": \"", player.netname, "\", \"Team\":", ftos(player.team_no));
+    event = strcat(event, ", \"Class\":", ftos(player.playerclass), "}");
 
     this.PostData(endpoint, event);
 }
