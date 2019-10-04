@@ -82,21 +82,18 @@ void () QuadRoundThink = {
 	if (!self.cnt2)	{
 		if ((self.cnt == 1) || (self.cnt == 5)) {
 			tmp = ftos (self.cnt);
-			bprint3(2, "\s[\s", tmp, "\s]\s minute");
+			bprint(PRINT_HIGH, "\s[\s", tmp, "\s]\s minute");
 			if (self.cnt != 1)
 				bprint(2, "s");
-			bprint(2, " remaining\n");
+			bprint(PRINT_HIGH, " remaining\n");
 		}
 		if (!self.cnt) {
 			if (rounds > 1)
             {
                 local string st;
                 st = infokey(world, "round_delay_time");
-                bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
+                bprint(PRINT_HIGH, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
-
-
-//			lightstyle (0, "e");
 
 			self.think = QuadRoundOver;
 			self.nextthink = (time + 0.1);
@@ -107,10 +104,10 @@ void () QuadRoundThink = {
 		fl = ceil (self.cnt2);
 		if (!(fl - self.cnt2)) {
 			tmp = ftos(self.cnt2);
-			bprint3(2, "\s[\s", tmp, "\s]\s second");
+			bprint(PRINT_HIGH, "\s[\s", tmp, "\s]\s second");
 			if ((self.cnt2 != 1))
-				bprint(2, "s");
-			bprint(2, " remaining\n");
+				bprint(PRINT_HIGH, "s");
+			bprint(PRINT_HIGH, " remaining\n");
 		}
 	}
 	gametime++;

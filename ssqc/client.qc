@@ -2443,7 +2443,7 @@ void () ClientDisconnect = {
 
     fr = rint(self.frags);
     st = ftos(fr);
-    bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
+    bprint(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
     StatTracker.PlayerChange = self;
     StatTracker.PlayerStateChange(ST_DISCONNECTED);

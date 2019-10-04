@@ -2800,39 +2800,39 @@ void () TeamFortress_ExplodePerson = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
     if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
-        bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "No ", self.owner.netname,
                 ", swallowing the grenade isn't very effective!\n");
     else if (self.owner.playerclass == PC_SNIPER)
-        bprint3(PRINT_MEDIUM, "Well ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "Well ", self.owner.netname,
                 ", don't quit your day job!\n");
     else if (self.owner.playerclass == PC_SOLDIER)
-        bprint3(PRINT_MEDIUM, "Ummm, ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "Ummm, ", self.owner.netname,
                 ", you're supposed to THROW the grenade!\n");
     else if (self.owner.playerclass == PC_DEMOMAN)
-        bprint3(PRINT_MEDIUM, "Ack! ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "Ack! ", self.owner.netname,
                 "! The grenade is your friend for another reason!\n");
     else if (self.owner.playerclass == PC_MEDIC) {
         if (self.weapon == GR_TYPE_CONCUSSION)
-            bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
+            bprint(PRINT_MEDIUM, "Yes ", self.owner.netname,
                     ", eating a concussion grenade is bad!\n");
         else
-            bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
+            bprint(PRINT_MEDIUM, "No ", self.owner.netname,
                     "! Assist your own suicide some other time!\n");
     }
     else if (self.owner.playerclass == PC_HVYWEAP)
-        bprint3(PRINT_MEDIUM, "Hey ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "Hey ", self.owner.netname,
                 ", you're not THAT heavy!\n");
     else if (self.owner.playerclass == PC_PYRO)
-        bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "Yes ", self.owner.netname,
                 ", the grenade does explode on '3'!\n");
     else if (self.owner.playerclass == PC_SPY)
-        bprint3(PRINT_MEDIUM, "You do realize ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "You do realize ", self.owner.netname,
                 ", you can blow your cover in easier ways!\n");
     else if (self.owner.playerclass == PC_ENGINEER)
-        bprint3(PRINT_MEDIUM, "Hey ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "Hey ", self.owner.netname,
                 ", study grenade dynamics on your own time!\n");
     else
-        bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
+        bprint(PRINT_MEDIUM, "No ", self.owner.netname,
                 ", throw the grenade, not the pin!\n");
 
     dremove(self);
@@ -2993,7 +2993,7 @@ void () TeamFortress_CheckforCheats = {
     }
     if (self.owner.cheat_level > 1200) {
         self.owner.cheat_level = 0;
-        bprint2(PRINT_MEDIUM, self.owner.netname,
+        bprint(PRINT_MEDIUM, self.owner.netname,
                 " has been kicked for cheating\n");
         sprint(self.owner, PRINT_HIGH,
                "You have been kicked for cheating, because of your speed\n");

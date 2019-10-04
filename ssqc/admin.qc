@@ -102,21 +102,21 @@ void () Admin_CycleDeal = {
 };
 
 void () Admin_DoKick = {
-    bprint4(PRINT_HIGH, self.admin_use.netname, " was kicked by ", self.netname, "\n");
+    bprint(PRINT_HIGH, self.admin_use.netname, " was kicked by ", self.netname, "\n");
     KickCheater(self.admin_use);
     self.admin_mode = 0;
     self.admin_use = world;
 };
 
 void () Admin_DoBan = {
-    bprint4(PRINT_HIGH, self.admin_use.netname, " was banned by ", self.netname, "\n");
+    bprint(PRINT_HIGH, self.admin_use.netname, " was banned by ", self.netname, "\n");
     BanCheater(self.admin_use);
     self.admin_mode = 0;
     self.admin_use = world;
 };
 
 void () Admin_ForceSpectator = {
-    bprint4(PRINT_HIGH, self.admin_use.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
+    bprint(PRINT_HIGH, self.admin_use.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
     stuffcmd(self.admin_use, "observe\n");
     self.admin_mode = 0;
     self.admin_use = world;
@@ -191,10 +191,10 @@ void () Admin_Pause = {
         pause_actor = self.netname;
         if (cb_prematch && infokey(world, "status") == "Countdown") {
             StopTimer();
-            bprint2(2, pause_actor, " stops the countdown\n");
+            bprint(PRINT_HIGH, pause_actor, " stops the countdown\n");
             return;
         }
-        bprint2(2, pause_actor, " paused the game\n");
+        bprint(PRINT_HIGH, pause_actor, " paused the game\n");
     }
     else {
         if (cb_prematch) {
@@ -208,11 +208,11 @@ void () Admin_Pause = {
         }
         pause_actor = self.netname;
         if (!unpause_requested) {                        
-            bprint2(2, pause_actor, " has requested to unpause the game in 5 seconds\n");     
+            bprint(PRINT_HIGH, pause_actor, " has requested to unpause the game in 5 seconds\n");     
             unpause_requested = 1;
         }
         else {
-            bprint2(2, pause_actor, " cancels unpause request\n"); 
+            bprint(PRINT_HIGH, pause_actor, " cancels unpause request\n"); 
             unpause_requested = 0;
             unpause_countdown = 0;
             unpause_lastcountnumber = 0;
@@ -225,7 +225,7 @@ void (entity p) CheckAutoKick = {
     local entity te;
 
     if ((p.teamkills >= autokick_kills) && (autokick_kills != 0)) {
-        bprint2(PRINT_HIGH, p.netname,
+        bprint(PRINT_HIGH, p.netname,
                 " was kicked for killing teammates\n");
         sprint(p, PRINT_HIGH, "You were kicked for killing teammates\n");
         KickCheater(p);
@@ -268,7 +268,7 @@ void (string cl_pwd) Admin_Check =
         stuffcmd(self, "\"\n");
         if (st2 != string_null && cl_pwd == st2) {
             self.is_admin = TRUE;
-            bprint2(2, self.netname, "\s gains full admin status!\s\n");
+            bprint(PRINT_HIGH, self.netname, "\s gains full admin status!\s\n");
             sprint(self, 2, "Type \scmd list\s for admin commands.\n");
             sprint(self, 2, "You can also use the \sadminmenu\s command for adjusting some settings.\n");  
         }
