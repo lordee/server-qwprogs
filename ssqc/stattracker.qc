@@ -85,8 +85,17 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
 
     // if not in water
     // calc midheight distnace between targ origin and ground
-    float vheight = ; // vertical height (midairs)
-
+    float vheight = 0;
+    if (targ.waterlevel == 0)
+    {
+        targ.origin
+        vector end;
+        end = targ.origin;
+        end_z = enz_z - 10000;
+        traceline(targ.origin, end, MOVE_NOMONSTERS, targ);
+        vheight = vlen(targ.origin - trace_endpos); // vertical height (midairs)
+    }
+    
     string event;
     event = strcat("\"Attacker\": {\"TF_ID\": ", ftos(attacker.tf_id), ", \"ClassName\": \"", attacker.classname, "\", \"Team\":", ftos(attacker.team_no), ", \"Class\":", ftos(attacker.playerclass));
     event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":", ftos(targ.playerclass));
