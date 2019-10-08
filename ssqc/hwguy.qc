@@ -113,6 +113,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
 
 		LaunchAssCan(org, spread_dir, var_speed);
         newmis.shot_id = shotID
+        newmis.weapontype = self.weapontype;
 
 		shotcount = shotcount - 1;
 	}

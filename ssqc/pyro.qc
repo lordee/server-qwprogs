@@ -614,6 +614,8 @@ void () W_FireFlame = {
     flame.think = s_explode1;
     flame.nextthink = time + 0.15;
     flame.shot_id = self.shot_id;
+    flame.weapon = DMSG_FLAME;
+    flame.weapontype = WEAP_FLAMETHROWER;
     setmodel(flame, "progs/s_explod.spr");
     setsize(flame, '0 0 0', '0 0 0');
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
@@ -718,6 +720,7 @@ void () W_FireIncendiaryCannon = {
     newmis.weapon = DMSG_INCENDIARY;
     newmis.classname = "pyro_rocket";
     newmis.shot_id = self.shot_id;
+    newmis.weapontype = WEAP_INCENDIARY;
     setmodel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');

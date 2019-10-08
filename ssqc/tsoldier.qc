@@ -41,17 +41,17 @@ void () NailGrenadeExplode = {
     self.nextthink = time + 0.7;
     if (nailgren_type == NGR_TYPE_LASER)		
     {
-    self.playerclass = 0;
-    self.think = NailGrenLaser;
+        self.playerclass = 0;
+        self.think = NailGrenLaser;
     }
     else if (nailgren_type == NGR_TYPE_BURST)
     {	
-    self.playerclass = 0;
-    self.think = NailGrenBurst;
+        self.playerclass = 0;
+        self.think = NailGrenBurst;
     }
     else
     {
-    self.think = NailGrenadeNailEm;
+        self.think = NailGrenadeNailEm;
     }
 };
 
@@ -81,6 +81,7 @@ void () NailGrenadeLaunchNail = {
         newmis.velocity = v_forward * 1000;
         newmis.touch = superspike_touch;
         newmis.weapon = DMSG_GREN_NAIL;
+        newmis.weapontype = 
 
         i = i + 1;
     }

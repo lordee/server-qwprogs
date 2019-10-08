@@ -1023,6 +1023,7 @@ void () TeamFortress_GrenadePrimed = {
         setmodel(newmis, "progs/hgren2.mdl");
     }
     newmis.shot_id = user.shot_id;
+    StatTracker.Shoot(user, self.weapon, TRUE);
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, user.origin);
     dremove(self);
@@ -2801,6 +2802,7 @@ void () TeamFortress_ExplodePerson = {
         setmodel(newmis, "progs/grenade2.mdl");
     }
     newmis.shot_id = self.shot_id;
+    StatTracker.Shoot(user, self.weapon, TRUE);
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
     if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))

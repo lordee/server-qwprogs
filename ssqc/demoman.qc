@@ -281,6 +281,8 @@ void () TeamFortress_DetpackSet = {
     newmis.avelocity = '0 0 0';
     newmis.weaponmode = 0;
     newmis.touch = TeamFortress_DetpackTouch;
+    newmis.weapon = DMSG_DETPACK;
+    newmis.weapontype = WEAP_DETPACK;
 
     setmodel(newmis, "progs/detpack.mdl");
 
@@ -304,6 +306,8 @@ void () TeamFortress_DetpackSet = {
     }
     newmis.nextthink = time + self.health;
     newmis.think = TeamFortress_DetpackExplode;
+    newmis.weapon = DMSG_DETPACK;
+    newmis.weapontype = WEAP_DETPACK;
     sprint(self.owner, PRINT_HIGH, "Detpack set!\n");
     dremove(self);
 };

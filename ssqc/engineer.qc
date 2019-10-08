@@ -108,6 +108,8 @@ void () W_FireLaser = {
     newmis.think = SUB_Remove;
     newmis.touch = LaserBolt_Touch;
     newmis.classname = "railslug";
+    newmis.weapon = DMSG_LASERBOLT;
+    newmis.weapontype = WEAP_LASER;
     newmis.shot_id = self.shot_id;
 };
 

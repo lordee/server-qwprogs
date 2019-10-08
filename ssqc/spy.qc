@@ -1307,6 +1307,8 @@ void () W_FireTranq = {
     newmis.nextthink = time + 6;
     newmis.classname = "proj_tranq";
     newmis.shot_id = self.shot_id;
+    newmis.weapon = DMSG_TRANQ;
+    newmis.weapontype = WEAP_TRANQ;
     setmodel(newmis, "progs/spike.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');

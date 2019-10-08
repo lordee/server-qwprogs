@@ -334,7 +334,7 @@ void (entity targ, entity inflictor, entity attacker,
 
     targ.health = targ.health - take;
     
-    StatTracker.Damage(targ, inflictor, attacker, damage, deathmsg);
+    StatTracker.Damage(targ, inflictor, attacker, damage);
 
     if (targ.armorvalue < 1) {
         targ.armorclass = 0;
@@ -356,103 +356,115 @@ void (entity targ, entity inflictor, entity attacker,
     self = oldself;
 };
 
-// why are these even separate in the first place... why is deathmessage a global? why why why
-string WeaponToString(float weapon)
+// TODO laser grens
+string WeaponToString(float weapon, float isGren)
 {
     string msg = "";
-    switch (weapon)
+    if (isGren)
     {
-        case WEAP_AXE:
-            msg = "WEAP_AXE";
-            break;
-        case WEAP_SPANNER:
-            msg = "WEAP_SPANNER";
-            break;
-        case WEAP_SHOTGUN:
-            msg = "WEAP_SHOTGUN";
-            break;
-        case WEAP_SUPER_SHOTGUN:
-            msg = "WEAP_SUPER_SHOTGUN";
-            break;
-        case WEAP_NAILGUN:
-            msg = "WEAP_NAILGUN";
-            break;
-        case WEAP_SUPER_NAILGUN:
-            msg = "WEAP_SUPER_NAILGUN";
-            break;
-        case WEAP_GRENADE_LAUNCHER:
-            msg = "WEAP_GRENADE_LAUNCHER";
-            break;
-        case WEAP_ROCKET_LAUNCHER:
-            msg = "WEAP_ROCKET_LAUNCHER";
-            break;
-        case WEAP_LIGHTNING:
-            msg = "WEAP_LIGHTNING";
-            break;
-        case WEAP_SNIPER_RIFLE:
-            msg = "WEAP_SNIPER_RIFLE";
-            break;
-        case WEAP_AUTO_RIFLE:
-            msg = "WEAP_AUTO_RIFLE";
-            break;
-        case WEAP_ASSAULT_CANNON:
-            msg = "WEAP_ASSAULT_CANNON";
-            break;
-        case WEAP_FLAMETHROWER:
-            msg = "WEAP_FLAMETHROWER";
-            break;
-        case WEAP_INCENDIARY:
-            msg = "WEAP_INCENDIARY";
-            break;
-        case WEAP_MEDIKIT:
-            msg = "WEAP_MEDIKIT";
-            break;
-        case WEAP_TRANQ:
-            msg = "WEAP_TRANQ";
-            break;
-        case WEAP_LASER:
-            msg = "WEAP_LASER";
-            break;
-        case WEAP_HOOK:
-            msg = "WEAP_HOOK";
-            break;
-        case WEAP_DETPACK:
-            msg = "WEAP_DETPACK";
-            break;
-        case GR_TYPE_NORMAL:
+        switch (weapon)
+        {
+            case GR_TYPE_NORMAL:
             msg = "GR_TYPE_NORMAL";
             break;
-        case GR_TYPE_CONCUSSION:
-            msg = "GR_TYPE_CONCUSSION";
-            break;
-        case GR_TYPE_NAIL:
-            msg = "GR_TYPE_NAIL";
-            // laser gren???
-            break;
-        case GR_TYPE_MIRV:
-            msg = "GR_TYPE_MIRV";
-            break;
-        case GR_TYPE_NAPALM:
-            msg = "GR_TYPE_NAPALM";
-            break;
-        case GR_TYPE_FLARE:
-            msg = "GR_TYPE_FLARE";
-            break;
-        case GR_TYPE_GAS:
-            msg = "GR_TYPE_GAS";
-            break;
-        case GR_TYPE_EMP:
-            msg = "GR_TYPE_EMP";
-            break;
-        case GR_TYPE_FLASH:
-            msg = "GR_TYPE_FLASH";
-            break;
-        case GR_TYPE_CALTROP:
-            msg = "GR_TYPE_CALTROP";
-            break;
-        default:
+            case GR_TYPE_CONCUSSION:
+                msg = "GR_TYPE_CONCUSSION";
+                break;
+            case GR_TYPE_NAIL:
+                msg = "GR_TYPE_NAIL";
+                // laser gren???
+                break;
+            case GR_TYPE_MIRV:
+                msg = "GR_TYPE_MIRV";
+                break;
+            case GR_TYPE_NAPALM:
+                msg = "GR_TYPE_NAPALM";
+                break;
+            case GR_TYPE_FLARE:
+                msg = "GR_TYPE_FLARE";
+                break;
+            case GR_TYPE_GAS:
+                msg = "GR_TYPE_GAS";
+                break;
+            case GR_TYPE_EMP:
+                msg = "GR_TYPE_EMP";
+                break;
+            case GR_TYPE_FLASH:
+                msg = "GR_TYPE_FLASH";
+                break;
+            case GR_TYPE_CALTROP:
+                msg = "GR_TYPE_CALTROP";
+                break;
+            default:
             msg = strcat("NOT FOUND: ", ftos(weapon));
+        }
     }
+    else
+    {
+        switch (weapon)
+        {
+            case WEAP_AXE:
+                msg = "WEAP_AXE";
+                break;
+            case WEAP_SPANNER:
+                msg = "WEAP_SPANNER";
+                break;
+            case WEAP_SHOTGUN:
+                msg = "WEAP_SHOTGUN";
+                break;
+            case WEAP_SUPER_SHOTGUN:
+                msg = "WEAP_SUPER_SHOTGUN";
+                break;
+            case WEAP_NAILGUN:
+                msg = "WEAP_NAILGUN";
+                break;
+            case WEAP_SUPER_NAILGUN:
+                msg = "WEAP_SUPER_NAILGUN";
+                break;
+            case WEAP_GRENADE_LAUNCHER:
+                msg = "WEAP_GRENADE_LAUNCHER";
+                break;
+            case WEAP_ROCKET_LAUNCHER:
+                msg = "WEAP_ROCKET_LAUNCHER";
+                break;
+            case WEAP_LIGHTNING:
+                msg = "WEAP_LIGHTNING";
+                break;
+            case WEAP_SNIPER_RIFLE:
+                msg = "WEAP_SNIPER_RIFLE";
+                break;
+            case WEAP_AUTO_RIFLE:
+                msg = "WEAP_AUTO_RIFLE";
+                break;
+            case WEAP_ASSAULT_CANNON:
+                msg = "WEAP_ASSAULT_CANNON";
+                break;
+            case WEAP_FLAMETHROWER:
+                msg = "WEAP_FLAMETHROWER";
+                break;
+            case WEAP_INCENDIARY:
+                msg = "WEAP_INCENDIARY";
+                break;
+            case WEAP_MEDIKIT:
+                msg = "WEAP_MEDIKIT";
+                break;
+            case WEAP_TRANQ:
+                msg = "WEAP_TRANQ";
+                break;
+            case WEAP_LASER:
+                msg = "WEAP_LASER";
+                break;
+            case WEAP_HOOK:
+                msg = "WEAP_HOOK";
+                break;
+            case WEAP_DETPACK:
+                msg = "WEAP_DETPACK";
+                break;
+            default:
+                msg = strcat("NOT FOUND: ", ftos(weapon));
+        }
+    }
+    
     return msg;
 }
 
@@ -801,7 +813,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     if (no_damage == FALSE)
         targ.health = (targ.health - take);
 
-    StatTracker.Damage(targ, inflictor, attacker, damage, deathmsg);
+    StatTracker.Damage(targ, inflictor, attacker, damage);
 
     if ((attacker.classname == "player")
         && ((targ.classname == "player")

@@ -689,7 +689,8 @@
 #define WEAP_DETPACK			131072
 #define WEAP_TRANQ			262144
 #define WEAP_LASER			524288
-// still room for 12 more weapons
+#define WEAP_PIPEBOMB_LAUNCHER  1048576
+// still room for 11 more weapons
 // but we can remove some by giving the weapons
 // a weapon mode (like the rifle)
 

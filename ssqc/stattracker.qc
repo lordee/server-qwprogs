@@ -18,6 +18,25 @@ void bprint(float msglvl, string s, optional string s2, optional string s3, opti
     bprint_engine(msglvl, s, s2, s3, s4, s5, s6, s7);
 }
 
+// TODO napalm??
+float IsGrenNotWeapon(float weapon)
+{
+    switch (weapon)
+    {
+        case DMSG_GREN_HAND:
+        case DMSG_GREN_NAIL:
+        case DMSG_GREN_MIRV:
+        case DMSG_GREN_GAS:
+        case DMSG_GREN_EMP:
+        case DMSG_GREN_EMP_AMMO:
+        case DMSG_GREN_FLASH:
+        case DMSG_GREN_CALTROP:
+            return true;
+    }
+
+    return false;
+}
+
 /*
 // in game stats
 death
@@ -42,8 +61,7 @@ class FO_StatTracker
     virtual void(float stateType) GameStateChange;
     virtual void(float stateType, entity player) PlayerStateChange;
     virtual void(float stateType) BroadcastMessage;
-    virtual void(entity targ, entity inflictor, entity attacker, float damage,
-      float damagetypef) Damage;
+    virtual void(entity targ, entity inflictor, entity attacker, float damage) Damage;
     virtual void() Shoot;
     virtual void(string endpoint, string data) PostData;
 };
@@ -71,12 +89,12 @@ void FO_StatTracker :: PostData(string endpoint, string data)
 }
 
 // TODO check that nailgun etc sends shooting packet every frame... also look at bundling them
-void FO_StatTracker :: Shoot(entity player)
+void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
 {
     string endpoint = "Shoot";
     string event;
-    string inflictor = WeaponToDMSG(self.current_weapon);
-    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"Inflictor\":", inflictor, ", \"Shot_ID\":", player.shot_id, " \"GameTime\":", gameTime);
+    string weaponType = WeaponToString(weaponTypef, isGren);
+    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", player.shot_id, " \"GameTime\":", gameTime);
     event = strcat(event, "\"GameID\":", ftos(this.GameID));
 
     this.PostData(endpoint, event);
@@ -84,15 +102,13 @@ void FO_StatTracker :: Shoot(entity player)
 
 float IsCritHit(float weapon, float damage);
 // damage done, shot hit, killed
-void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage,
-      float damagetypef)
+void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage)
 {
     if (this.GameID == 0)
         return;
     string endpoint = "Damage";
     // TODO t_damage calls this but most fields might not be set?
     float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
-    
     float shotID = inflictor.shot_id; // player or missile
     float killed = (targ.health <= 0) ? 1 : 0;
 
@@ -100,10 +116,13 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     if ((inflictor.classname == "detpack")
             && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
             damagetypef = DMSG_DETPACK_DIS;
-    string damagetype = DMSGToString(damagetypef);
+    // TODO disarm stuff above?
+    string damageType = DMSGToString(inflictor.weapon);
+    float isGren = IsGrenNotWeapon(inflictor.weapon);
+    string weaponType = WeaponToString(inflictor.weapontype, isGren);
 
     // if not in water
-    // calc midheight distnace between targ origin and ground
+    // calc midheight distance between targ origin and ground
     float vheight = 0;
     if (targ.waterlevel == 0)
     {
@@ -118,9 +137,9 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     string event;
     event = strcat("\"Attacker\": {\"TF_ID\": ", ftos(attacker.tf_id), ", \"ClassName\": \"", attacker.classname, "\", \"Team\":", ftos(attacker.team_no), ", \"Class\":", ftos(attacker.playerclass));
     event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":", ftos(targ.playerclass));
-    event = strcat(event, "}, \"Inflictor\": \"", damagetype, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
+    event = strcat(event, "}, \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
     event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed), ", \"GameTime:\":", ftos(gameTime));
-    event = strcat(event, ", \"GameID\": ", ftos(this.GameID));
+    event = strcat(event, ", \"GameID\": ", ftos(this.GameID), ", \"DeathType\": \"", damageType, "\"");
 
     this.PostData(endpoint, event);
 }
