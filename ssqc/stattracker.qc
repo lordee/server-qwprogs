@@ -19,9 +19,9 @@ void bprint(float msglvl, string s, optional string s2, optional string s3, opti
 }
 
 // TODO napalm??
-float IsGrenNotWeapon(float weapon)
+float IsGrenNotWeapon(entity inflictor)
 {
-    switch (weapon)
+    switch (inflictor.weapon)
     {
         case DMSG_GREN_HAND:
         case DMSG_GREN_NAIL:
@@ -31,16 +31,15 @@ float IsGrenNotWeapon(float weapon)
         case DMSG_GREN_EMP_AMMO:
         case DMSG_GREN_FLASH:
         case DMSG_GREN_CALTROP:
-            return true;
+        case DMSG_GREN_NAPALM:
+            return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
 /*
 // in game stats
-death
-shot fired
 touches
 caps
 kill on flag carrier
@@ -118,7 +117,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
             damagetypef = DMSG_DETPACK_DIS;
     // TODO disarm stuff above?
     string damageType = DMSGToString(inflictor.weapon);
-    float isGren = IsGrenNotWeapon(inflictor.weapon);
+    float isGren = IsGrenNotWeapon(inflictor);
     string weaponType = WeaponToString(inflictor.weapontype, isGren);
 
     // if not in water

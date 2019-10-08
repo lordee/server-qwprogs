@@ -130,7 +130,7 @@ void () NapalmGrenadeNetThink = {
             while (te) {
                 if ((te.owner == self.owner) &&
                     (te.no_active_napalm_grens == 1)) {
-                    te.weapon = DMSG_FLAME;
+                    te.weapon = DMSG_FLAME; // this is useless??
                     te.think = RemoveGrenade;
                     te.nextthink = time + 0.1;
                 }
@@ -187,6 +187,8 @@ void () NapalmGrenadeExplode = {
     head = spawn();
     head.think = NapalmGrenadeNetThink;
     head.classname = "grentimer";
+    head.weapon = DMSG_GREN_NAPALM; // just for stattracker because whoever wrote pyro is an idiot; "all flames are the same!"
+    head.weapontype = GR_TYPE_NAPALM; // same as above
     head.nextthink = time + 0.1;
     head.heat = 0;
     head.origin = self.origin;
