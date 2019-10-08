@@ -698,7 +698,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     take = rint(take);
 
-    if (no_damage == 0)
+    if (no_damage == FALSE)
         targ.health = (targ.health - take);
 
     StatTracker.Damage(targ, inflictor, attacker, damage, deathmsg);
@@ -744,7 +744,6 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     }
 
     if (targ.health <= 0) {
-
         if ((inflictor.classname == "detpack")
             && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
             deathmsg = DMSG_DETPACK_DIS;

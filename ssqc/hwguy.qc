@@ -103,7 +103,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     bullet_speed = PC_HVYWEAP_PROJSPEED;
     bullet_dir = normalize(v_forward * bullet_speed);
 
-    float shotID = GetShotID();
+    float shotID = self.shot_id;
     
     while (shotcount > 0) {       
 		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance

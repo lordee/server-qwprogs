@@ -20,11 +20,8 @@ void bprint(float msglvl, string s, optional string s2, optional string s3, opti
 
 /*
 // in game stats
-kill
 death
-damage done
 shot fired
-shot hit (damage done)
 touches
 caps
 kill on flag carrier
@@ -45,7 +42,9 @@ class FO_StatTracker
     virtual void(float stateType) GameStateChange;
     virtual void(float stateType, entity player) PlayerStateChange;
     virtual void(float stateType) BroadcastMessage;
-    virtual void() Damage;
+    virtual void(entity targ, entity inflictor, entity attacker, float damage,
+      float damagetypef) Damage;
+    virtual void() Shoot;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -71,17 +70,37 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(data,"\n"));
 }
 
+// TODO check that nailgun etc sends shooting packet every frame... also look at bundling them
+void FO_StatTracker :: Shoot(entity player)
+{
+    string endpoint = "Shoot";
+    string event;
+    string inflictor = WeaponToDMSG(self.current_weapon);
+    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"Inflictor\":", inflictor, ", \"Shot_ID\":", player.shot_id, " \"GameTime\":", gameTime);
+    event = strcat(event, "\"GameID\":", ftos(this.GameID));
+
+    this.PostData(endpoint, event);
+}
+
 float IsCritHit(float weapon, float damage);
+// damage done, shot hit, killed
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage,
       float damagetypef)
 {
     if (this.GameID == 0)
         return;
+    string endpoint = "Damage";
     // TODO t_damage calls this but most fields might not be set?
-
     float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
-    string damagetype = DMSGToString(damagetypef);
+    
     float shotID = inflictor.shot_id; // player or missile
+    float killed = (targ.health <= 0) ? 1 : 0;
+
+    // this is in a random place in TF_T_Damage, I'm not going to track down why, just repeat it here.. probably could be rearranged though to not do same logic twice
+    if ((inflictor.classname == "detpack")
+            && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
+            damagetypef = DMSG_DETPACK_DIS;
+    string damagetype = DMSGToString(damagetypef);
 
     // if not in water
     // calc midheight distnace between targ origin and ground
@@ -91,7 +110,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
         targ.origin
         vector end;
         end = targ.origin;
-        end_z = enz_z - 10000;
+        end_z = end_z - 10000;
         traceline(targ.origin, end, MOVE_NOMONSTERS, targ);
         vheight = vlen(targ.origin - trace_endpos); // vertical height (midairs)
     }
@@ -99,12 +118,16 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     string event;
     event = strcat("\"Attacker\": {\"TF_ID\": ", ftos(attacker.tf_id), ", \"ClassName\": \"", attacker.classname, "\", \"Team\":", ftos(attacker.team_no), ", \"Class\":", ftos(attacker.playerclass));
     event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":", ftos(targ.playerclass));
-    event = strcat(event, "}, \"Inflictor\": \"", damagetype, "\", \"Damage\":", ftos(damage), "\"Shot_ID\":", ftos(shotID));
-    event = strcat(event, , "\"VHeight\":", ftos(vheight))
+    event = strcat(event, "}, \"Inflictor\": \"", damagetype, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
+    event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed), ", \"GameTime:\":", ftos(gameTime));
+    event = strcat(event, ", \"GameID\": ", ftos(this.GameID));
+
+    this.PostData(endpoint, event);
 }
 
-// todo finish this
-void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7)
+// TODO finish this
+void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s, optional string s2, 
+        optional string s3, optional string s4, optional string s5, optional string s6, optional string s7)
 {
     if (this.GameID == 0)
         return;

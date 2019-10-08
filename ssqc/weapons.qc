@@ -1098,7 +1098,7 @@ void () W_FireRocket = {
 
     newmis.weapon = DMSG_ROCKETL;
     newmis.classname = "proj_rocket";
-    newmis.shot_id = GetShotID();
+    newmis.shot_id = self.shot_id;
     setmodel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
@@ -1310,7 +1310,7 @@ void () W_FireGrenade = {
     newmis.avelocity = '300 300 300';
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = GrenadeExplode;
-    newmis.shot_id = GetShotID();
+    newmis.shot_id = self.shot_id;
     setmodel(newmis, "progs/grenade2.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
@@ -1335,7 +1335,7 @@ void (vector org, vector dir) launch_spike = {
     setmodel(newmis, "progs/spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
-    newmis.shot_id = GetShotID();
+    newmis.shot_id = self.shot_id;
 
     newmis.velocity = dir * ng_velocity;
 };
@@ -1956,6 +1956,7 @@ void () W_Attack = {
     self.shot_id = GetShotID();
 
     if (self.current_weapon == WEAP_AXE) {
+        StatTracker.Shoot(self);
         Attack_Finished(0.5);
         sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
@@ -1968,12 +1969,14 @@ void () W_Attack = {
         else
             player_axed1();
     } else if (self.current_weapon == WEAP_SPANNER) {
+        StatTracker.Shoot(self);
         Attack_Finished(0.5);
         sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         player_axe1();
     } else if (self.current_weapon == WEAP_SHOTGUN) {
         if (CheckForReload() == TRUE)
             return;
+        StatTracker.Shoot(self);
         player_shot1();
         W_FireShotgun();
         self.reload_shotgun = self.reload_shotgun + 1;
@@ -1983,6 +1986,7 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
         if (CheckForReload() == TRUE)
             return;
+        StatTracker.Shoot(self);
         player_shot1();
         W_FireSuperShotgun();
         self.reload_super_shotgun = self.reload_super_shotgun + 2;
@@ -1990,12 +1994,15 @@ void () W_Attack = {
         CheckForReload();
         Attack_Finished(0.7);
     } else if (self.current_weapon == WEAP_NAILGUN) {
+        StatTracker.Shoot(self);
         player_nail1();
     } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
+        StatTracker.Shoot(self);
         player_nail1();
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (CheckForReload() == TRUE)
             return;
+        StatTracker.Shoot(self);
         player_rocket1();
         W_FireGrenade();
         self.reload_grenade_launcher = self.reload_grenade_launcher + 1;
@@ -2005,6 +2012,7 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         if (CheckForReload() == TRUE)
             return;
+        StatTracker.Shoot(self);
         player_rocket1();
         W_FireRocket();
         self.reload_rocket_launcher = self.reload_rocket_launcher + 1;
@@ -2012,6 +2020,7 @@ void () W_Attack = {
         CheckForReload();
         Attack_Finished(0.8);
     } else if (self.current_weapon == WEAP_LIGHTNING) {
+        StatTracker.Shoot(self);
         player_light1();
         Attack_Finished(0.1);
         sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
@@ -2019,6 +2028,7 @@ void () W_Attack = {
         if (self.flags & FL_ONGROUND) {
             if (CheckForReload() == TRUE)
                 return;
+            StatTracker.Shoot(self);
             player_shot1();
             W_FireSniperRifle();
             if (sniperreload) {
@@ -2029,6 +2039,7 @@ void () W_Attack = {
             Attack_Finished(1.5);
         }
     } else if (self.current_weapon == WEAP_AUTO_RIFLE) {
+        StatTracker.Shoot(self);
         player_autorifle1();
         W_FireAutoRifle();
         Attack_Finished(0.1);
@@ -2053,9 +2064,11 @@ void () W_Attack = {
             self.immune_to_check = time + 5;
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
+            StatTracker.Shoot(self);
             player_assaultcannonup1();
         }
     } else if (self.current_weapon == WEAP_FLAMETHROWER) {
+        StatTracker.Shoot(self);
         player_shot1();
         W_FireFlame();
         if (self.waterlevel > 2)
@@ -2064,6 +2077,7 @@ void () W_Attack = {
             Attack_Finished(0.15);
     } else if (self.current_weapon == WEAP_INCENDIARY) {
         if (self.ammo_rockets >= 3) {
+            StatTracker.Shoot(self);
             player_rocket1();
             W_FireIncendiaryCannon();
             if (pyro_type == 1)
@@ -2075,6 +2089,7 @@ void () W_Attack = {
             self.antispam_incendiary_cannon = time + 3;
         }
     } else if (self.current_weapon == WEAP_MEDIKIT) {
+        StatTracker.Shoot(self);
         sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
         if (r < 0.25)
@@ -2087,11 +2102,13 @@ void () W_Attack = {
             player_medikitd1();
         Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_TRANQ) {
+        StatTracker.Shoot(self);
         sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireTranq();
         Attack_Finished(1.5);
     } else if (self.current_weapon == WEAP_LASER) {
+        StatTracker.Shoot(self);
         sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireLaser();
