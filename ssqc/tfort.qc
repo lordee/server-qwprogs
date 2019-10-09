@@ -938,8 +938,6 @@ void () TeamFortress_GrenadePrimed = {
 
     user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENPRIMED);
     user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENTHROWING);
-    float shotid = user.shot_id;
-    user.shot_id = shotid + 1;
     sound(user, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
     KickPlayer(-1, user);
     newmis = spawn();
@@ -1027,6 +1025,8 @@ void () TeamFortress_GrenadePrimed = {
         newmis.avelocity = '300 300 300';
         setmodel(newmis, "progs/hgren2.mdl");
     }
+    float shotid = user.shot_id;
+    user.shot_id = shotid + 1;
     newmis.shot_id = user.shot_id;
     StatTracker.Shoot(user, self.weapon, TRUE);
     setsize(newmis, '0 0 0', '0 0 0');
@@ -2728,11 +2728,16 @@ void () TeamFortress_ExplodePerson = {
     local entity te;
 
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 1);
-    float shotid = self.shot_id;
-    self.shot_id = shotid + 1;
     KickPlayer(-2, self.owner);
 
+    entity p = self.owner;
+    float shotid = p.shot_id + 1;
+    dprint(strcat(ftos(shotid),"\n"));
+    p.shot_id = shotid;
+    StatTracker.Shoot(self.owner, self.weapon, TRUE);
+
     newmis = spawn();
+    newmis.shot_id = shotid;
     newmis.movetype = 10;
     newmis.solid = 2;
     newmis.classname = "grenade";
@@ -2807,8 +2812,7 @@ void () TeamFortress_ExplodePerson = {
         newmis.avelocity = '300 300 300';
         setmodel(newmis, "progs/grenade2.mdl");
     }
-    newmis.shot_id = self.shot_id;
-    StatTracker.Shoot(self, self.weapon, TRUE);
+    
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
     if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
