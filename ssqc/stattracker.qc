@@ -12,13 +12,6 @@ enum
     ST_BROADCAST
 };
 
-void bprint(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) 
-{
-    StatTracker.BroadcastMessage(ST_BROADCAST, msglvl, s, s2, s3, s4, s5, s6, s7);
-    bprint_engine(msglvl, s, s2, s3, s4, s5, s6, s7);
-}
-
-// TODO napalm??
 float IsGrenNotWeapon(entity inflictor)
 {
     switch (inflictor.weapon)
@@ -48,7 +41,7 @@ time
 // chat log?
 
 */
-
+// TODO gameTime needs to get incremented
 class FO_StatTracker
 {
     float RequestID;
@@ -59,9 +52,11 @@ class FO_StatTracker
     void FO_StatTracker; // constructor
     virtual void(float stateType) GameStateChange;
     virtual void(float stateType, entity player) PlayerStateChange;
-    virtual void(float stateType) BroadcastMessage;
+    // TODO - confirm 9 args is ok for broadcastmessage, or strcat it before calling
+    virtual void(float stateType, float msglvl, string s, optional string s2, 
+        optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) BroadcastMessage;
     virtual void(entity targ, entity inflictor, entity attacker, float damage) Damage;
-    virtual void() Shoot;
+    virtual void(entity player, float weaponTypef, float isGren) Shoot;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -88,18 +83,20 @@ void FO_StatTracker :: PostData(string endpoint, string data)
 }
 
 // TODO check that nailgun etc sends shooting packet every frame... also look at bundling them
+string WeaponToString(float weapon, float isGren);
 void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
 {
     string endpoint = "Shoot";
     string event;
     string weaponType = WeaponToString(weaponTypef, isGren);
-    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", player.shot_id, " \"GameTime\":", gameTime);
+    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(player.shot_id), " \"GameTime\":", ftos(gameTime));
     event = strcat(event, "\"GameID\":", ftos(this.GameID));
 
     this.PostData(endpoint, event);
 }
 
 float IsCritHit(float weapon, float damage);
+string DMSGToString(float dmsg);
 // damage done, shot hit, killed
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage)
 {
@@ -110,13 +107,14 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
     float shotID = inflictor.shot_id; // player or missile
     float killed = (targ.health <= 0) ? 1 : 0;
+    float damagetypef = inflictor.weapon;
 
     // this is in a random place in TF_T_Damage, I'm not going to track down why, just repeat it here.. probably could be rearranged though to not do same logic twice
     if ((inflictor.classname == "detpack")
             && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
             damagetypef = DMSG_DETPACK_DIS;
     // TODO disarm stuff above?
-    string damageType = DMSGToString(inflictor.weapon);
+    string damageType = DMSGToString(damagetypef);
     float isGren = IsGrenNotWeapon(inflictor);
     string weaponType = WeaponToString(inflictor.weapontype, isGren);
 
@@ -125,7 +123,6 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     float vheight = 0;
     if (targ.waterlevel == 0)
     {
-        targ.origin
         vector end;
         end = targ.origin;
         end_z = end_z - 10000;
@@ -135,8 +132,8 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     
     string event;
     event = strcat("\"Attacker\": {\"TF_ID\": ", ftos(attacker.tf_id), ", \"ClassName\": \"", attacker.classname, "\", \"Team\":", ftos(attacker.team_no), ", \"Class\":", ftos(attacker.playerclass));
-    event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":", ftos(targ.playerclass));
-    event = strcat(event, "}, \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
+    event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":");
+    event = strcat(event, ftos(targ.playerclass), "}, \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
     event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed), ", \"GameTime:\":", ftos(gameTime));
     event = strcat(event, ", \"GameID\": ", ftos(this.GameID), ", \"DeathType\": \"", damageType, "\"");
 
@@ -169,7 +166,6 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
     string endpoint = "PlayerStateChange";
     string event = "";
     string eventType = "";
-    float gameTime = 0;
 
     switch (stateType)
     {
@@ -213,7 +209,6 @@ void FO_StatTracker :: GameStateChange(float stateType)
     string serverName = "";
     serverName = infokey(world, "hostname");
     string eventType = "";
-    float gameTime = 0;
 
     if (serverName == "")
     {
@@ -240,7 +235,8 @@ void FO_StatTracker :: GameStateChange(float stateType)
                 }
                 loopCount = loopCount + 1;
 
-                event = strcat(event, "\"TF_ID\":", ftos(p.tf_id), "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no), ", \"Class\":", ftos(p.playerclass), "}");
+                event = strcat(event, "\"TF_ID\":", ftos(p.tf_id), "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no));
+                event = strcat(event, ", \"Class\":", ftos(p.playerclass), "}");
                 p = find(p, ::classname, "player");
             }
             event = strcat(event, "]");
@@ -278,4 +274,10 @@ void URI_Get_Callback(float reqid, float responsecode, string resourcebody)
         if (reqid == StatTracker.GameStartReqID)
             StatTracker.GameID = stof(resourcebody);
     }
+}
+
+void bprint(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) 
+{
+    StatTracker.BroadcastMessage(ST_BROADCAST, msglvl, s, s2, s3, s4, s5, s6, s7);
+    bprint_engine(msglvl, s, s2, s3, s4, s5, s6, s7);
 }

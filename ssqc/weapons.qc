@@ -1959,7 +1959,8 @@ void () W_Attack = {
     self.show_hostile = time + 1;
 
     // stats related stuff
-    self.shot_id = GetShotID();
+    float shotid = self.shot_id;
+    self.shot_id = shotid + 1;
     self.weapontype = self.current_weapon;
 
     if (self.current_weapon == WEAP_AXE) {

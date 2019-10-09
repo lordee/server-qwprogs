@@ -647,3 +647,8 @@ string (string s, float width) strpadr =
 
 float captainmode;
 .float captain;
+
+// stattracker defs
+.float weapontype; // tracks WEAP_ floats on player and projectiles (deathmsg is on .weapon)
+.float shot_id; // allows for tracking of if a shot misses/hits for stats
+float gameTime;

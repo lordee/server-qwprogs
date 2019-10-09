@@ -112,7 +112,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
         org = self.origin + '0 0 10' + rand_dir;
 
 		LaunchAssCan(org, spread_dir, var_speed);
-        newmis.shot_id = shotID
+        newmis.shot_id = shotID;
         newmis.weapontype = self.weapontype;
 
 		shotcount = shotcount - 1;
