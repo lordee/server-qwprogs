@@ -22,18 +22,25 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercommand("fo_hud_editor");
 	registercommand("fo_hud_reload");
 	registercommand("fo_hud_reset");
-	registercommand("fo_autohop");
+	registercvar(FOCMD_AUTOHOP, "0");
+	registercvar(FOCMD_GRENTIMER, "1");
+    registercommand("fo_menu_game");
 
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
+
+    CurrentMenu = FO_MENU_TEAM;
 };
 
 noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
+    localcmd("menu_restart");
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
-	team_no = getstatf(STAT_TEAMNO);
+	ScreenSize = [width, height, menushown];
+    team_no = getstatf(STAT_TEAMNO);
+    is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -49,9 +56,10 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
 
-	sui_begin(width, height);
-	Hud_Draw(width, height);
-	sui_end();
+    sui_begin(width, height);
+    Menu_Draw(width, height, menushown);
+    Hud_Draw(width, height);
+    sui_end();
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -67,20 +75,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 		case "fo_hud_reset":
 			FO_Hud_Editor_LoadDefaultSettings();
 			break;
-		case "fo_autohop":
-			val = stof(argv(1));
-			if (val == 1)
-			{
-				Settings.Autohop = 1;
-				print("auto bunnyhop has been enabled\n");
-			}
-			else if (val == 0)
-			{
-				Settings.Autohop = 0;
-				print("auto bunnyhop has been disabled\n");
-			}
-			FO_WriteSettings();
-			break;
+        case "fo_menu_game":
+            FO_Menu_Game(TRUE);
+            break;
     }	
     return FALSE;
 };
@@ -106,7 +103,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame()
 {
-	if (Settings.Autohop == 1)
+	if (cvar(FOCMD_AUTOHOP) == 1)
 	{
 		if (input_buttons&2)
 		{
@@ -118,4 +115,8 @@ noref void CSQC_Input_Frame()
 			}
 		}	
 	}
+}
+
+void CSQC_Shutdown() = {
+    FO_WriteSettings();
 }

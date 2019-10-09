@@ -1,20 +1,3 @@
-vector MENU_BG = '0.2 0.3 0.4';
-vector MENU_BG_DARK = '0.1 0.15 0.2';
-vector MENU_BORDER = '0.3 0.4 0.5';
-vector MENU_SELECTED = '0 1 0';
-vector MENU_UNSELECTED = '1 0 0';
-vector MENU_BUTTON = '0.3 0.4 0.5';
-vector MENU_BUTTON_BORDER = '0.35 0.45 0.55';
-vector MENU_TEXT_1 = '1 1 1';
-vector MENU_TEXT_2 = '0.7 0.75 0.75';
-vector MENU_HIGHLIGHT = '1 1 1';
-vector MENU_DARKEN = '1 1 1';
-
-vector MENU_TEXT_SMALL = '8 8 0';
-vector MENU_TEXT_MEDIUM = '16 16 0';
-vector MENU_TEXT_LARGE = '24 24 0';
-float MENU_START_CONTENT = 32;
-
 void Hud_WriteCfg(string path);
 float GetDrawPanel(string id);
 void SetDrawPanel(string id);
@@ -35,22 +18,6 @@ void FO_Hud_Editor()
         setcursormode(TRUE);
     }
 }
-
-float(string id, vector pos, vector size, string text) hud_button =
-{
-	sui_push_frame(pos, size);
-	vector basecolor = sui_is_hovered(id) ? MENU_BUTTON + MENU_HIGHLIGHT * 0.1 : MENU_BUTTON; 
-	basecolor = sui_is_held(id) ? MENU_BUTTON - MENU_DARKEN * 0.1 : basecolor;
-	sui_fill([0, 0], size, basecolor, 0.6, 0);
-	sui_border_box([0, 0], size, 1, MENU_BUTTON_BORDER, 0.4, 0);
-	
-	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-	sui_text([0, 0], MENU_TEXT_SMALL, text, MENU_TEXT_1, 1, 0);	
-	sui_action_element([0, 0], size, id, sui_noop);
-	sui_pop_frame();
-	
-	return sui_is_clicked(id);
-};
 
 void(string id, vector pos, vector size, vector minmaxsteps, __inout float value) hud_slider =
 {
@@ -125,6 +92,10 @@ float(string id, vector pos, vector size, float alpha, float enabled) hud_panel 
         {
             alpha = 0.6;
             basecolor = MENU_BG - MENU_DARKEN * 0.1;
+        }
+        // Make options panel switch back to last selected element after dragging
+        if(sui_is_released(id) && id == "hudoptionspanel") {
+            _last_clicked_actions[0] = Hud_Panels[Editor_SelectedPanel_Index].id;
         }
     }
 
@@ -360,4 +331,15 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
     drawstring(pos, msg, fontSize, colour, 1, 0);
 
     return pos;
+}
+
+void AddGrenTimer(float grentype) {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        if(FO_Hud_Grentimers[i].grentype == 0) {
+            FO_Hud_Grentimers[i].grentype = grentype;
+            FO_Hud_Grentimers[i].expires = time + 3.8;
+            FO_Hud_Grentimers[i].icon_index = 4;
+            break;
+        }
+    }
 }

@@ -4,6 +4,9 @@
 #define MSG_FLAGINFO        2
 
 #define MSG_SBAR        4
+#define MSG_GRENPRIMED      5
+
+#define MSG_CLIENT_MENU     6
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
@@ -14,3 +17,6 @@
 
 #define FLAGINFO_ICON_FLAG  0
 #define FLAGINFO_ICON_BUTTON 1
+
+#define CLIENT_MENU_TEAM      1
+#define CLIENT_MENU_CLASS     2

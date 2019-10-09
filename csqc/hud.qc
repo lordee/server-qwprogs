@@ -45,6 +45,7 @@ void Hud_WriteCfg(string path)
 
 void FO_Hud_Editor_LoadDefaultSettings()
 {
+    Hud_Panels[HUD_PANEL_HUDOPTIONS].drawPanel = Hud_DrawHudOptionsPanel;
     vector vsize = (vector)getproperty(VF_SCREENVSIZE);
     float width = vsize_x;
     float height = vsize_y;
@@ -96,7 +97,9 @@ void Hud_DrawFlagStatusBar(string panelid)
             flagInfoCount++;
         }
     }
-    
+    if(fo_hud_editor && !flagInfoCount) {
+        flagInfoCount = 1;
+    }
     vector fillsize = [sizex * 4, sizey * flagInfoCount];
     float alpha = 0;
     if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_FLAGINFO].Display))
@@ -445,6 +448,10 @@ void Hud_Draw(float width, float height)
         Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
         if(sui_is_last_clicked(Hud_Panels[i].id)) {
             Editor_SelectedPanel_Index = i;
+        }
+        //Draw panel names when editing
+        if(fo_hud_editor && Hud_Panels[i].id != "hudoptionspanel") {
+            drawstring(Hud_Panels[i].Position + [2,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
         }
     }
 
