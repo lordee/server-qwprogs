@@ -281,6 +281,9 @@ float () Sentry_Fire = {
     if (self.enemy.is_feigning == 1)
         return (0);
 
+    float shotid;
+    shotid = self.real_owner.shot_id;
+    
     if ((self.weapon == 3) && (self.ammo_rockets > 0) &&
         (self.super_damage_finished < time)) {
         Sentry_MuzzleFlash();
@@ -305,6 +308,12 @@ float () Sentry_Fire = {
 
         self.super_damage_finished = time + 3;
         self.ammo_rockets = self.ammo_rockets - 1;
+        
+        shotid++;
+        self.shot_id = shotid;
+        newmis.shot_id = shotid;
+        self.real_owner.shot_id = shotid;
+        StatTracker.Shoot(self, DMSG_SENTRYGUN_ROCKET, FALSE);
 
         if (self.ammo_rockets == 10)
             sprint(self.real_owner, PRINT_HIGH,
@@ -319,6 +328,10 @@ float () Sentry_Fire = {
     sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
 
     deathmsg = DMSG_SENTRYGUN_BULLET;
+    shotid++;
+    self.shot_id = shotid;
+    self.real_owner.shot_id = shotid;
+    StatTracker.Shoot(self, DMSG_SENTRYGUN_BULLET, FALSE);
 
     self.v_angle = self.angles;
     FireBullets(4, dir, '0.1 0.1 0');

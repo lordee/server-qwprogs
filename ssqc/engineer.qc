@@ -855,6 +855,7 @@ void () TeamFortress_FinishedBuilding = {
         setsize(oldself, '-16 -16 0', '16 16 4');
         newmis = spawn();
         newmis.classname = "building_sentrygun";
+        newmis.tf_id = oldself.real_owner.tf_id;
         newmis.health = 150;
         newmis.max_health = newmis.health;
         newmis.weapon = 1;
