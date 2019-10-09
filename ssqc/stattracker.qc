@@ -37,6 +37,7 @@ touches
 caps
 kill on flag carrier
 time
+changeclass isn't in game code
 
 // chat log?
 
@@ -88,8 +89,8 @@ void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
     string endpoint = "Shoot";
     string event;
     string weaponType = WeaponToString(weaponTypef, isGren);
-    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(player.shot_id), " \"GameTime\":", ftos(gameTime));
-    event = strcat(event, "\"GameID\":", ftos(this.GameID));
+    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(player.shot_id), ", \"GameTime\":", ftos(gameTime));
+    event = strcat(event, ", \"GameID\":", ftos(this.GameID));
 
     this.PostData(endpoint, event);
 }
@@ -99,8 +100,8 @@ string DMSGToString(float dmsg);
 // damage done, shot hit, killed
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage)
 {
-    if (this.GameID == 0)
-        return;
+    /*if (this.GameID == 0)
+        return;*/
     string endpoint = "Damage";
     // TODO t_damage calls this but most fields might not be set?
     float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
@@ -127,6 +128,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
         end_z = end_z - 10000;
         traceline(targ.origin, end, MOVE_NOMONSTERS, targ);
         vheight = vlen(targ.origin - trace_endpos); // vertical height (midairs)
+        vheight = vheight - 24; // feet
     }
     
     string event;
@@ -160,8 +162,8 @@ void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s,
 */
 void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
 {
-    if (this.GameID == 0)
-        return;
+    /*if (this.GameID == 0)
+        return;*/
 
     string endpoint = "PlayerStateChange";
     string event = "";
@@ -282,7 +284,7 @@ void URI_Get_Callback(float reqid, float responsecode, string resourcebody)
 void bprint(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) 
 {
 
-    /*string msg = "";
+    string msg = "";
     msg = strcat(s, s2, s3, s4, s5, s6, s7);
     dprint(msg);
 
