@@ -52,9 +52,8 @@ class FO_StatTracker
     void FO_StatTracker; // constructor
     virtual void(float stateType) GameStateChange;
     virtual void(float stateType, entity player) PlayerStateChange;
-    // TODO - confirm 9 args is ok for broadcastmessage, or strcat it before calling
-    virtual void(float stateType, float msglvl, string s, optional string s2, 
-        optional string s3, optional string s4, optional string s5, optional string s6) BroadcastMessage;
+    /*virtual void(float stateType, float msglvl, string s, optional string s2, 
+        optional string s3, optional string s4, optional string s5, optional string s6) BroadcastMessage;*/
     virtual void(entity targ, entity inflictor, entity attacker, float damage) Damage;
     virtual void(entity player, float weaponTypef, float isGren) Shoot;
     virtual void(string endpoint, string data) PostData;
@@ -140,7 +139,8 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     this.PostData(endpoint, event);
 }
 
-// TODO finish this
+
+/*
 void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s, optional string s2, 
         optional string s3, optional string s4, optional string s5, optional string s6)
 {
@@ -157,7 +157,7 @@ void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s,
             break;
     }
 }
-
+*/
 void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
 {
     if (this.GameID == 0)
@@ -278,18 +278,15 @@ void URI_Get_Callback(float reqid, float responsecode, string resourcebody)
     }
 }
 
-
+/*
 void bprint(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) 
 {
-    string six = "";
-    if (s6 != "")
-    {
-        if (s7 != "")
-        {
-            six = strcat(s6, s7);
-        }
-    }
-    string six = strcat(s6, s7);
-    StatTracker.BroadcastMessage(ST_BROADCAST, msglvl, s, s2, s3, s4, s5, six);
-    //bprint_engine(msglvl, s, s2, s3, s4, s5, s6, s7);
-}
+
+    /*string msg = "";
+    msg = strcat(s, s2, s3, s4, s5, s6, s7);
+    dprint(msg);
+
+
+    //StatTracker.BroadcastMessage(ST_BROADCAST, msglvl, s, s2, s3, s4, s5, six);
+    bprint_engine(msglvl, s, s2, s3, s4, s5, s6, s7);
+}*/
