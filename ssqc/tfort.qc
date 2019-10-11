@@ -287,6 +287,7 @@ void (float inp) TeamFortress_ChangeClass = {
         }
         spot = find(spot, classname, "player");
     }
+    StatTracker.PlayerStateChange(ST_CHANGECLASS, self);
     TeamFortress_PrintClassName(self, self.playerclass,
                                 (self.tfstate & 8));
     TeamFortress_SetEquipment();
