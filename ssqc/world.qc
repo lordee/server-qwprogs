@@ -328,6 +328,8 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
+    if (StatTracker)
+        StatTracker.IncrementGameTime();
     Vote_Check();
 };
 

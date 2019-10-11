@@ -1,6 +1,7 @@
 enum
 {
     ST_GAMESTART,
+    ST_GAMEEND,
     ST_CHANGENAME,
     ST_CHANGETEAM,
     ST_CHANGECLASS,
@@ -40,8 +41,10 @@ suicides
 detdispenser and detsentry aren't getting credited to the initiator as "world" does the damage
 // holding concs and non damage grens
 // TODO gameTime needs to get incremented
+// duelmode needs gamestart maybe?
 
 // chat log?
+//ST_GAMEEND on map Rounds Over! Use "cmd map <mapname>" to go to the nextmap
 
 // TODO bundle shoot json messages
 
@@ -53,8 +56,11 @@ class FO_StatTracker
     string URL;
     float GameID;
     float GameStartReqID; // used to track request id of game init, so we can set gameid
+    float GameStartTime;
+    float GameTime;
 
     void FO_StatTracker; // constructor
+    virtual void() IncrementGameTime;
     virtual void(float stateType) GameStateChange;
     virtual void(float stateType, entity player) PlayerStateChange;
     /*virtual void(float stateType, float msglvl, string s, optional string s2, 
@@ -71,6 +77,31 @@ void FO_StatTracker :: FO_StatTracker(void)
     URL = "http://localhost:5000/api/SSQCStats";
     GameID = 0;
     GameStartReqID = 0;
+    GameTime = 0;
+}
+
+void FO_StatTracker :: IncrementGameTime()
+{
+    if (clanbattle)
+    {
+        if (!this.GameStartTime)
+        {
+            if (cb_prematch)
+            {
+                return;
+            }
+            else
+            {
+                this.GameStartTime = time;
+            }
+        }
+    }
+    else if (!this.GameStartTime)
+    {
+        this.GameStartTime = time;
+    }
+
+    this.GameTime = (time - GameStartTime);
 }
 
 void FO_StatTracker :: PostData(string endpoint, string data)
@@ -104,7 +135,7 @@ void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
     
     string event;
     
-    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(player.shot_id), ", \"GameTime\":", ftos(gameTime));
+    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(player.shot_id), ", \"GameTime\":", ftos(this.GameTime));
     event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"GameID\":", ftos(this.GameID));
 
     this.PostData(endpoint, event);
@@ -162,7 +193,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     event = strcat("\"Attacker\": {\"TF_ID\": ", ftos(tfid), ", \"ClassName\": \"", attacker.classname, "\", \"Team\":", ftos(attacker.team_no), ", \"Class\":", ftos(pc));
     event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":");
     event = strcat(event, ftos(targ.playerclass), "}, \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
-    event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed), ", \"GameTime:\":", ftos(gameTime));
+    event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed), ", \"GameTime:\":", ftos(this.GameTime));
     event = strcat(event, ", \"GameID\": ", ftos(this.GameID), ", \"DeathType\": \"", deathType, "\"");
 
     this.PostData(endpoint, event);
@@ -221,7 +252,7 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
             break;
     }
 
-    event = strcat("\"GameID\":", ftos(this.GameID), ", \"GameTime\":", ftos(gameTime), ", \"EventType\": \"", eventType, "\", \"Player\": {");
+    event = strcat("\"GameID\":", ftos(this.GameID), ", \"GameTime\":", ftos(this.GameTime), ", \"EventType\": \"", eventType, "\", \"Player\": {");
     event = strcat(event, "\"TF_ID\":", ftos(player.tf_id), ", \"Name\": \"", player.netname, "\", \"Team\":", ftos(player.team_no));
     event = strcat(event, ", \"Class\":", ftos(player.playerclass), "}");
 
@@ -247,11 +278,12 @@ void FO_StatTracker :: GameStateChange(float stateType)
     switch (stateType)
     {
         case ST_GAMESTART:
+            this.GameStartTime = time;
             this.GameStartReqID = this.RequestID;
             eventType = "GameStart";
             string currmap;
             currmap = strtrim(mapname);
-            event = strcat("\"GameID\": ", ftos(this.GameID), ", \"ServerName\": \"", serverName, "\", \"GameTime\": ", ftos(gameTime), ",");
+            event = strcat("\"GameID\": ", ftos(this.GameID), ", \"ServerName\": \"", serverName, "\", \"GameTime\": ", ftos(this.GameTime), ",");
             event = strcat(event, "\"EventType\": \"", eventType, "\", \"Map\": \"", currmap, "\", \"Initiator\": \"world\"");
             // send player info too
             entity p;
@@ -266,7 +298,7 @@ void FO_StatTracker :: GameStateChange(float stateType)
                 }
                 loopCount = loopCount + 1;
 
-                event = strcat(event, "\"TF_ID\":", ftos(p.tf_id), "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no));
+                event = strcat(event, "{\"TF_ID\":", ftos(p.tf_id), ", \"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no));
                 event = strcat(event, ", \"Class\":", ftos(p.playerclass), "}");
                 p = find(p, ::classname, "player");
             }
@@ -291,6 +323,10 @@ void FO_StatTracker :: GameStateChange(float stateType)
             event = strcat(event, "]");
 
             this.PostData(endpoint, event);           
+            break;
+        case ST_GAMEEND:
+            eventType = "GameEnd";
+            event = strcat("\"GameID\":", ftos(this.GameID), )
             break;
     }
 }

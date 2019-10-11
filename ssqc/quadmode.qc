@@ -110,7 +110,6 @@ void () QuadRoundThink = {
 			bprint(PRINT_HIGH, " remaining\n");
 		}
 	}
-	gametime++;
 	self.nextthink = (time + 1);
 };
 
@@ -275,6 +274,7 @@ void () StartQuadRound =
 			p = find(p, classname, "player");
 		}
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
+		StatTracker.GameStateChange(ST_GAMEEND);
 		localcmd("stop\n");
 		return;
 	}
