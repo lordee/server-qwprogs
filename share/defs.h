@@ -951,7 +951,7 @@
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		2
 #define PC_MEDIC_GRENADE_MAX_1		4
-#define PC_MEDIC_GRENADE_MAX_2		3
+#define PC_MEDIC_GRENADE_MAX_2		2
 #define PC_MEDIC_TF_ITEMS		0
 #define PC_MEDIC_REGEN_TIME		3	// Number of seconds between each regen.
 #define PC_MEDIC_REGEN_AMOUNT		2	// Amount of health regenerated each regen.

@@ -1359,6 +1359,7 @@ void () W_FireSuperSpikes = {
     newmis.touch = superspike_touch;
     newmis.weapon = DMSG_SNAILGUN;
     newmis.weapontype = WEAP_SUPER_NAILGUN;
+    newmis.shot_id = self.shot_id;
     setmodel(newmis, "progs/s_spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     KickPlayer(-3, self);
@@ -1367,6 +1368,10 @@ void () W_FireSuperSpikes = {
 void (float ox) W_FireSpikes = {
     local vector dir;
 
+    float shotid;
+    shotid = self.shot_id + 1;
+    self.shot_id = shotid;
+    StatTracker.Shoot(self, self.current_weapon, FALSE);
     makevectors(self.v_angle);
     if (((self.ammo_nails >= 4) || ((self.ammo_nails >= 2) && !old_ng_rof)) &&
         (self.current_weapon == WEAP_SUPER_NAILGUN)) {
@@ -1387,6 +1392,7 @@ void (float ox) W_FireSpikes = {
     }
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
+    newmis.shot_id = self.shot_id;
     KickPlayer(-3, self);
 };
 
@@ -1959,8 +1965,8 @@ void () W_Attack = {
     self.show_hostile = time + 1;
 
     // stats related stuff
-    float shotid = self.shot_id;
-    self.shot_id = shotid + 1;
+    float shotid = self.shot_id + 1;
+    self.shot_id = shotid;
     self.weapontype = self.current_weapon;
 
     if (self.current_weapon == WEAP_AXE) {
@@ -2002,10 +2008,10 @@ void () W_Attack = {
         CheckForReload();
         Attack_Finished(0.7);
     } else if (self.current_weapon == WEAP_NAILGUN) {
-        StatTracker.Shoot(self, self.current_weapon, FALSE);
+        self.shot_id = shotid - 1; // we do this on launch of spike
         player_nail1();
     } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
-        StatTracker.Shoot(self, self.current_weapon, FALSE);
+        self.shot_id = shotid - 1; // we do this on launch of spike
         player_nail1();
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (CheckForReload() == TRUE)
