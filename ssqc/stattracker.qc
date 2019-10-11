@@ -36,14 +36,17 @@ float IsGrenNotWeapon(entity inflictor)
 touches
 caps
 kill on flag carrier
-time
-changeclass isn't in game code
 suicides
+detdispenser and detsentry aren't getting credited to the initiator as "world" does the damage
+// holding concs and non damage grens
+// TODO gameTime needs to get incremented
 
 // chat log?
 
+// TODO bundle shoot json messages
+
 */
-// TODO gameTime needs to get incremented
+
 class FO_StatTracker
 {
     float RequestID;
@@ -62,7 +65,6 @@ class FO_StatTracker
 };
 
 FO_StatTracker StatTracker; // global
-
 void FO_StatTracker :: FO_StatTracker(void)
 {
     RequestID = 0;
@@ -83,8 +85,6 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(data,"\n"));
 }
 
-// TODO check that nailgun etc sends shooting packet every frame... also look at bundling them
-// ng, sng, hwguy (pyro is fine), dispenser
 string WeaponToString(float weapon, float isGren);
 string DMSGToString(float dmsg);
 void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
@@ -221,8 +221,8 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
             break;
     }
 
-    event = strcat("\"GameID\":", ftos(this.GameID), "\"GameTime\":", ftos(gameTime), ", \"EventType\": \"", eventType, "\", \"Player\": {");
-    event = strcat(event, "\"TF_ID\":", ftos(player.tf_id), "\"Name\": \"", player.netname, "\", \"Team\":", ftos(player.team_no));
+    event = strcat("\"GameID\":", ftos(this.GameID), ", \"GameTime\":", ftos(gameTime), ", \"EventType\": \"", eventType, "\", \"Player\": {");
+    event = strcat(event, "\"TF_ID\":", ftos(player.tf_id), ", \"Name\": \"", player.netname, "\", \"Team\":", ftos(player.team_no));
     event = strcat(event, ", \"Class\":", ftos(player.playerclass), "}");
 
     this.PostData(endpoint, event);

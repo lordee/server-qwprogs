@@ -1581,9 +1581,7 @@ void () PutClientInServer = {
     {
         StatTracker.PlayerStateChange(ST_CHANGECLASS, self);
     }
-
     self.last_playerclass = self.playerclass;
-
     self.attack_finished = time + 0.3;
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
