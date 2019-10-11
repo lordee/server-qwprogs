@@ -84,7 +84,7 @@ void FO_StatTracker :: PostData(string endpoint, string data)
 }
 
 // TODO check that nailgun etc sends shooting packet every frame... also look at bundling them
-// ng, sng, hwguy (pyro is fine), sg?
+// ng, sng, hwguy (pyro is fine), dispenser
 string WeaponToString(float weapon, float isGren);
 string DMSGToString(float dmsg);
 void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
@@ -93,7 +93,7 @@ void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
     string weaponType = "None";
     string deathType = "None";
 
-    if (player.classname == "building_sentrygun")
+    if (player.classname == "building_sentrygun" || player.classname == "building_dispenser")
     {
         deathType = DMSGToString(weaponTypef);
     }
@@ -132,19 +132,13 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
 
     float tfid = attacker.tf_id;
     float pc = attacker.playerclass;
-    // TODO dispenser
-    if (attacker.classname == "building_sentrygun")
+    if (attacker.classname == "building_sentrygun" || inflictor.classname == "building_dispenser"
+        || inflictor.classname == "building_sentrygun")
     {
-        tfid = attacker.real_owner.tf_id;
-        pc = attacker.real_owner.playerclass;
-        if (deathmsg == DMSG_SENTRYGUN_BULLET)
-        {
-            deathtypef = DMSG_SENTRYGUN_BULLET;
-        }
-        else
-        {
-            deathtypef = DMSG_SENTRYGUN_ROCKET;
-        }
+        tfid = (attacker.real_owner != 0) ? attacker.real_owner.tf_id : inflictor.real_owner.tf_id; // sentry is attacker mostly, inflictor if blowing up etc
+        pc = (attacker.real_owner != 0) ? attacker.real_owner.playerclass : inflictor.real_owner.playerclass;
+
+        deathtypef = deathmsg;
     }
 
     string deathType = DMSGToString(deathtypef);

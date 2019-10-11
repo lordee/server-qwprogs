@@ -809,6 +809,7 @@ void () TeamFortress_FinishedBuilding = {
         teamsprint(self.team_no, self, " has built a dispenser\n");
         self.ammo_cells = self.ammo_cells - 100;
         oldself.classname = "building_dispenser";
+        oldself.tf_id = self.tf_id;
         oldself.netname = "dispenser";
         oldself.blocked = T_Dispenser;
         oldself.touch = T_Dispenser;
@@ -937,6 +938,12 @@ void () Dispenser_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = DMSG_DISPENSER_EXPLODE;
+        float shotid;
+        shotid = self.real_owner.shot_id;
+        shotid++;
+        self.shot_id = shotid;
+        self.real_owner.shot_id = shotid;
+        StatTracker.Shoot(self, DMSG_DISPENSER_EXPLODE, FALSE);
         sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
         if (sdmg > 250) {
             sdmg = 250;

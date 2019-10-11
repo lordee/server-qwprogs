@@ -239,6 +239,12 @@ void () Sentry_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = DMSG_SENTRYGUN_EXPLODE;
+        float shotid;
+        shotid = self.real_owner.shot_id;
+        shotid++;
+        self.shot_id = shotid;
+        self.real_owner.shot_id = shotid;
+        StatTracker.Shoot(self, DMSG_SENTRYGUN_EXPLODE, FALSE);
         T_RadiusDamage(self, self.real_owner, 75 + self.ammo_rockets * 8,
                        self);
     }
@@ -293,6 +299,7 @@ float () Sentry_Fire = {
         newmis.owner = self;
         newmis.movetype = MOVETYPE_FLYMISSILE;
         newmis.solid = SOLID_BBOX;
+        newmis.classname = "sentrygun_rocket";
 
         newmis.velocity = normalize(self.enemy.origin - self.origin) * 800;
         newmis.angles = vectoangles(newmis.velocity);
