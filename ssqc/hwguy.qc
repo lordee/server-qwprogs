@@ -103,8 +103,10 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     bullet_speed = PC_HVYWEAP_PROJSPEED;
     bullet_dir = normalize(v_forward * bullet_speed);
 
-    float shotID = self.shot_id;
-    
+    float shotID;
+    shotID = self.shot_id + 1;
+    self.shot_id = shotID;
+    StatTracker.Shoot(self, self.current_weapon, FALSE);
     while (shotcount > 0) {       
 		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
         rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
