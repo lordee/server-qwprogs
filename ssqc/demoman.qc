@@ -306,9 +306,16 @@ void () TeamFortress_DetpackSet = {
     }
     newmis.nextthink = time + self.health;
     newmis.think = TeamFortress_DetpackExplode;
+    float shotid;
+    shotid = newmis.owner.shot_id;
+    shotid++;
+    newmis.shot_id = shotid;
+    newmis.owner.shot_id = shotid;
     newmis.weapon = DMSG_DETPACK;
     newmis.weapontype = WEAP_DETPACK;
+    newmis.tf_id = newmis.owner.tf_id;
     sprint(self.owner, PRINT_HIGH, "Detpack set!\n");
+    StatTracker.Shoot(newmis, newmis.weapontype, FALSE);
     dremove(self);
 };
 
@@ -318,7 +325,6 @@ void () TeamFortress_DetpackExplode = {
     local entity head;
     local entity te;
     local vector org;
-
     self.owner.detpack_left = 0;
     bprint(PRINT_MEDIUM, "FIRE IN THE HOLE!\n");
     sound(self, CHAN_WEAPON, "weapons/detpack.wav", 1, ATTN_NONE);
