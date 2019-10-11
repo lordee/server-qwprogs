@@ -40,11 +40,13 @@ kill on flag carrier
 suicides
 detdispenser and detsentry aren't getting credited to the initiator as "world" does the damage
 // holding concs and non damage grens
-// TODO gameTime needs to get incremented
 // duelmode needs gamestart maybe?
+disarm detpacks
+reveal spies
+t_damage calls
+quad round start and end
 
 // chat log?
-//ST_GAMEEND on map Rounds Over! Use "cmd map <mapname>" to go to the nextmap
 
 // TODO bundle shoot json messages
 
@@ -149,20 +151,13 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     /*if (this.GameID == 0)
         return;*/
     string endpoint = "Damage";
-    // TODO t_damage calls this but most fields might not be set?
     float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
     float shotID = inflictor.shot_id; // player or missile
     float killed = (targ.health <= 0) ? 1 : 0;
     float deathtypef = inflictor.weapon;
-
-    // this is in a random place in TF_T_Damage, I'm not going to track down why, just repeat it here.. probably could be rearranged though to not do same logic twice
-    if ((inflictor.classname == "detpack")
-            && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
-            deathtypef = DMSG_DETPACK_DIS;
-    // TODO disarm stuff above?
-
     float tfid = attacker.tf_id;
     float pc = attacker.playerclass;
+
     if (attacker.classname == "building_sentrygun" || inflictor.classname == "building_dispenser"
         || inflictor.classname == "building_sentrygun")
     {
@@ -281,54 +276,54 @@ void FO_StatTracker :: GameStateChange(float stateType)
             this.GameStartTime = time;
             this.GameStartReqID = this.RequestID;
             eventType = "GameStart";
-            string currmap;
-            currmap = strtrim(mapname);
-            event = strcat("\"GameID\": ", ftos(this.GameID), ", \"ServerName\": \"", serverName, "\", \"GameTime\": ", ftos(this.GameTime), ",");
-            event = strcat(event, "\"EventType\": \"", eventType, "\", \"Map\": \"", currmap, "\", \"Initiator\": \"world\"");
-            // send player info too
-            entity p;
-            float loopCount = 0;
-            event = strcat(event, ", \"Players\": [");
-            p = find(world, ::classname, "player");
-            while(p)
-            {
-                if (loopCount > 0)
-                {
-                    event = strcat(event, ", ");
-                }
-                loopCount = loopCount + 1;
-
-                event = strcat(event, "{\"TF_ID\":", ftos(p.tf_id), ", \"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no));
-                event = strcat(event, ", \"Class\":", ftos(p.playerclass), "}");
-                p = find(p, ::classname, "player");
-            }
-            event = strcat(event, "]");
-
-            // specs
-            loopCount = 0;
-            event = strcat(event, ", \"Spectators\": [");
-            p = find(world, ::classname, "observer");
-
-            while(p)
-            {
-                if (loopCount > 0)
-                {
-                    event = strcat(event, ", ");
-                }
-                loopCount = loopCount + 1;
-
-                event = strcat(event, "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no), ", \"Class\":", ftos(p.playerclass), "}");
-                p = find(p, ::classname, "observer");
-            }
-            event = strcat(event, "]");
-
-            this.PostData(endpoint, event);           
             break;
         case ST_GAMEEND:
             eventType = "GameEnd";
-            event = strcat("\"GameID\":", ftos(this.GameID), )
             break;
     }
+
+    string currmap;
+    currmap = strtrim(mapname);
+    event = strcat("\"GameID\": ", ftos(this.GameID), ", \"ServerName\": \"", serverName, "\", \"GameTime\": ", ftos(this.GameTime), ",");
+    event = strcat(event, "\"EventType\": \"", eventType, "\", \"Map\": \"", currmap, "\", \"Initiator\": \"world\"");
+    // send player info too
+    entity p;
+    float loopCount = 0;
+    event = strcat(event, ", \"Players\": [");
+    p = find(world, ::classname, "player");
+    while(p)
+    {
+        if (loopCount > 0)
+        {
+            event = strcat(event, ", ");
+        }
+        loopCount = loopCount + 1;
+
+        event = strcat(event, "{\"TF_ID\":", ftos(p.tf_id), ", \"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no));
+        event = strcat(event, ", \"Class\":", ftos(p.playerclass), "}");
+        p = find(p, ::classname, "player");
+    }
+    event = strcat(event, "]");
+
+    // specs
+    loopCount = 0;
+    event = strcat(event, ", \"Spectators\": [");
+    p = find(world, ::classname, "observer");
+
+    while(p)
+    {
+        if (loopCount > 0)
+        {
+            event = strcat(event, ", ");
+        }
+        loopCount = loopCount + 1;
+
+        event = strcat(event, "{\"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no), ", \"Class\":", ftos(p.playerclass), "}");
+        p = find(p, ::classname, "observer");
+    }
+    event = strcat(event, "]");
+
+    this.PostData(endpoint, event);
 }
 
 void URI_Get_Callback(float reqid, float responsecode, string resourcebody)
