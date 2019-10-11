@@ -959,6 +959,10 @@ void () W_FireAssaultCannon = {
     
     if (fo_hwguy == FALSE)
     {
+        float shotID;
+        shotID = self.shot_id + 1;
+        self.shot_id = shotID;
+        StatTracker.Shoot(self, self.current_weapon, FALSE);
         if (cannon_accuracy == 1)
             FireBullets(5, dir, '0 0 0');
         else if (cannon_accuracy == 2)
@@ -2078,7 +2082,7 @@ void () W_Attack = {
             self.immune_to_check = time + 5;
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
-            StatTracker.Shoot(self, self.current_weapon, FALSE);
+            self.shot_id = shotid - 1; // we do this on launch of bullets
             player_assaultcannonup1();
         }
     } else if (self.current_weapon == WEAP_FLAMETHROWER) {
