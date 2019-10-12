@@ -39,8 +39,6 @@ caps
 kill on flag carrier
 suicides
 detdispenser and detsentry aren't getting credited to the initiator as "world" does the damage
-TF_ENGINEER_DETDISP
-TF_ENGINEER_DETSENTRY
 // holding concs and non damage grens
 // duelmode needs gamestart maybe?
 disarm detpacks

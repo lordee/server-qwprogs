@@ -2004,10 +2004,8 @@ void () W_Attack = {
         CheckForReload();
         Attack_Finished(0.7);
     } else if (self.current_weapon == WEAP_NAILGUN) {
-        self.shot_id = shotid - 1; // we do this on launch of spike
         player_nail1();
     } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
-        self.shot_id = shotid - 1; // we do this on launch of spike
         player_nail1();
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (CheckForReload() == TRUE)
@@ -2074,7 +2072,6 @@ void () W_Attack = {
             self.immune_to_check = time + 5;
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
-            self.shot_id = shotid - 1; // we do this on launch of bullets
             player_assaultcannonup1();
         }
     } else if (self.current_weapon == WEAP_FLAMETHROWER) {
