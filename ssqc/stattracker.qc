@@ -39,6 +39,8 @@ caps
 kill on flag carrier
 suicides
 detdispenser and detsentry aren't getting credited to the initiator as "world" does the damage
+TF_ENGINEER_DETDISP
+TF_ENGINEER_DETSENTRY
 // holding concs and non damage grens
 // duelmode needs gamestart maybe?
 disarm detpacks
@@ -68,7 +70,7 @@ class FO_StatTracker
     /*virtual void(float stateType, float msglvl, string s, optional string s2, 
         optional string s3, optional string s4, optional string s5, optional string s6) BroadcastMessage;*/
     virtual void(entity targ, entity inflictor, entity attacker, float damage) Damage;
-    virtual void(entity player, float weaponTypef, float isGren) Shoot;
+    virtual float(entity attacker, float weaponTypef, float isGren) Shoot;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -120,13 +122,15 @@ void FO_StatTracker :: PostData(string endpoint, string data)
 
 string WeaponToString(float weapon, float isGren);
 string DMSGToString(float dmsg);
-void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
+float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
 {
+    float shotID = attacker.shot_id + 1;
+    attacker.shot_id = shotID;
     string endpoint = "Shoot";
     string weaponType = "None";
     string deathType = "None";
 
-    if (player.classname == "building_sentrygun" || player.classname == "building_dispenser")
+    if (attacker.classname == "building_sentrygun" || attacker.classname == "building_dispenser")
     {
         deathType = DMSGToString(weaponTypef);
     }
@@ -137,10 +141,12 @@ void FO_StatTracker :: Shoot(entity player, float weaponTypef, float isGren)
     
     string event;
     
-    event = strcat("\"TF_ID\":", ftos(player.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(player.shot_id), ", \"GameTime\":", ftos(this.GameTime));
+    event = strcat("\"TF_ID\":", ftos(attacker.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(attacker.shot_id), ", \"GameTime\":", ftos(this.GameTime));
     event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"GameID\":", ftos(this.GameID));
 
     this.PostData(endpoint, event);
+
+    return shotID;
 }
 
 float IsCritHit(float weapon, float damage);

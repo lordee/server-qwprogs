@@ -239,12 +239,9 @@ void () Sentry_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = DMSG_SENTRYGUN_EXPLODE;
-        float shotid;
-        shotid = self.real_owner.shot_id;
-        shotid++;
-        self.shot_id = shotid;
+        self.shot_id = self.real_owner.shot_id;       
+        float shotid = StatTracker.Shoot(self, DMSG_SENTRYGUN_EXPLODE, FALSE);
         self.real_owner.shot_id = shotid;
-        StatTracker.Shoot(self, DMSG_SENTRYGUN_EXPLODE, FALSE);
         T_RadiusDamage(self, self.real_owner, 75 + self.ammo_rockets * 8,
                        self);
     }
@@ -315,12 +312,11 @@ float () Sentry_Fire = {
 
         self.super_damage_finished = time + 3;
         self.ammo_rockets = self.ammo_rockets - 1;
-        
-        shotid++;
+
         self.shot_id = shotid;
+        shotid = StatTracker.Shoot(self, DMSG_SENTRYGUN_ROCKET, FALSE);
         newmis.shot_id = shotid;
         self.real_owner.shot_id = shotid;
-        StatTracker.Shoot(self, DMSG_SENTRYGUN_ROCKET, FALSE);
 
         if (self.ammo_rockets == 10)
             sprint(self.real_owner, PRINT_HIGH,
@@ -335,10 +331,9 @@ float () Sentry_Fire = {
     sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
 
     deathmsg = DMSG_SENTRYGUN_BULLET;
-    shotid++;
     self.shot_id = shotid;
+    shotid = StatTracker.Shoot(self, DMSG_SENTRYGUN_BULLET, FALSE);
     self.real_owner.shot_id = shotid;
-    StatTracker.Shoot(self, DMSG_SENTRYGUN_BULLET, FALSE);
 
     self.v_angle = self.angles;
     FireBullets(4, dir, '0.1 0.1 0');

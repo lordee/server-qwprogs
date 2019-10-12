@@ -938,12 +938,10 @@ void () Dispenser_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = DMSG_DISPENSER_EXPLODE;
-        float shotid;
-        shotid = self.real_owner.shot_id;
-        shotid++;
-        self.shot_id = shotid;
+
+        self.shot_id = self.real_owner.shot_id;
+        float shotid = StatTracker.Shoot(self, DMSG_DISPENSER_EXPLODE, FALSE);
         self.real_owner.shot_id = shotid;
-        StatTracker.Shoot(self, DMSG_DISPENSER_EXPLODE, FALSE);
         sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
         if (sdmg > 250) {
             sdmg = 250;
@@ -1328,6 +1326,18 @@ void (entity eng, string bld, float explode) DestroyBuildingWithOptions = {
                 te.real_owner.building = world;
             }
             if(explode) {
+                float dmsg = 0;
+                if (bld == "building_dispenser")
+                {
+                    dmsg = DMSG_DISPENSER_EXPLODE;
+                }
+                else
+                {
+                    dmsg = DMSG_SENTRYGUN_EXPLODE;
+                }
+                te.shot_id = te.real_owner.shot_id;
+                float shotid = StatTracker.Shoot(te, dmsg, FALSE);
+                te.real_owner.shot_id = shotid;
                 TF_T_Damage(te, world, world, 500, 0, 0);
             } else {
                 if(bld == "building_dispenser")

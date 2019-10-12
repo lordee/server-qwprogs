@@ -306,16 +306,15 @@ void () TeamFortress_DetpackSet = {
     }
     newmis.nextthink = time + self.health;
     newmis.think = TeamFortress_DetpackExplode;
-    float shotid;
-    shotid = newmis.owner.shot_id;
-    shotid++;
-    newmis.shot_id = shotid;
-    newmis.owner.shot_id = shotid;
+    
     newmis.weapon = DMSG_DETPACK;
     newmis.weapontype = WEAP_DETPACK;
     newmis.tf_id = newmis.owner.tf_id;
     sprint(self.owner, PRINT_HIGH, "Detpack set!\n");
-    StatTracker.Shoot(newmis, newmis.weapontype, FALSE);
+
+    newmis.shot_id = newmis.owner.shot_id;
+    float shotid = StatTracker.Shoot(newmis, newmis.weapontype, FALSE);
+    newmis.owner.shot_id = shotid;
     dremove(self);
 };
 

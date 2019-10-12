@@ -931,9 +931,6 @@ void SpawnHandGrenade(entity own, vector vel, float nthink, float grenType)
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = SUB_Null;
     newmis.nextthink = nthink;
-    float shotid = own.shot_id + 1;
-    own.shot_id = shotid;
-    newmis.shot_id = shotid;
     newmis.team_no = own.team_no;
     newmis.weapontype = grenType;
 
@@ -1021,7 +1018,11 @@ void SpawnHandGrenade(entity own, vector vel, float nthink, float grenType)
     }
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, own.origin);
-    StatTracker.Shoot(own, self.weapon, TRUE);
+
+    float shotid = own.shot_id;
+    newmis.shot_id = shotid;
+    shotid = StatTracker.Shoot(own, self.weapon, TRUE);
+    own.shot_id = shotid;
 }
 
 void () TeamFortress_GrenadePrimed = {

@@ -959,9 +959,6 @@ void () W_FireAssaultCannon = {
     
     if (fo_hwguy == FALSE)
     {
-        float shotID;
-        shotID = self.shot_id + 1;
-        self.shot_id = shotID;
         StatTracker.Shoot(self, self.current_weapon, FALSE);
         if (cannon_accuracy == 1)
             FireBullets(5, dir, '0 0 0');
@@ -1372,9 +1369,6 @@ void () W_FireSuperSpikes = {
 void (float ox) W_FireSpikes = {
     local vector dir;
 
-    float shotid;
-    shotid = self.shot_id + 1;
-    self.shot_id = shotid;
     StatTracker.Shoot(self, self.current_weapon, FALSE);
     makevectors(self.v_angle);
     if (((self.ammo_nails >= 4) || ((self.ammo_nails >= 2) && !old_ng_rof)) &&
@@ -1969,8 +1963,6 @@ void () W_Attack = {
     self.show_hostile = time + 1;
 
     // stats related stuff
-    float shotid = self.shot_id + 1;
-    self.shot_id = shotid;
     self.weapontype = self.current_weapon;
 
     if (self.current_weapon == WEAP_AXE) {
