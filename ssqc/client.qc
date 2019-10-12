@@ -1251,6 +1251,12 @@ void () ClientKill = {
     if (self.clientkillfree == 1 && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
         TeamFortress_SetupRespawn(FALSE);
     } else {
+        StatTracker.Suicide(self);
+        float dam;
+        dam = self.health + self.armorvalue;
+        self.weapon = DMSG_SUICIDE;
+        self.health = 0;
+        StatTracker.Damage(self, self, self, dam);
         bprint(PRINT_MEDIUM, self.netname, " suicides\n");
 
         // If infected, give the medic a frag

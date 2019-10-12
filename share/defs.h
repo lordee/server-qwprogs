@@ -1255,6 +1255,7 @@
 #define DMSG_GREN_PIPE_AIR			40
 #define DMSG_GREN_CALTROP			41
 #define DMSG_GREN_NAPALM            42
+#define DMSG_SUICIDE				43
 
 /*======================================================*/
 /* Menus						*/

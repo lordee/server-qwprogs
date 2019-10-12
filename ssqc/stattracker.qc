@@ -44,6 +44,7 @@ disarm detpacks
 reveal spies
 t_damage calls
 quad round start and end
+DMSG_SUICIDE not being found in dmsgtostring
 
 // chat log?
 
@@ -68,6 +69,8 @@ class FO_StatTracker
         optional string s3, optional string s4, optional string s5, optional string s6) BroadcastMessage;*/
     virtual void(entity targ, entity inflictor, entity attacker, float damage) Damage;
     virtual float(entity attacker, float weaponTypef, float isGren) Shoot;
+    virtual void(entity player) Suicide;
+    virtual void(float tfid, string weaponType, float shotID, string deathType) ShootPost;
     virtual void(string endpoint, string data) PostData;
 };
 
@@ -116,14 +119,35 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(url,"\n"));
     dprint(strcat(data,"\n"));
 }
+string DMSGToString(float dmsg);
+
+void FO_StatTracker :: ShootPost(float tfid, string weaponType, float shotID, string deathType)
+{
+    string endpoint = "Shoot";
+    string event;
+    
+    event = strcat("\"TF_ID\":", ftos(tfid), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(shotID), ", \"GameTime\":", ftos(this.GameTime));
+    event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"GameID\":", ftos(this.GameID));
+
+    this.PostData(endpoint, event);
+}
+
+void FO_StatTracker :: Suicide(entity player)
+{
+    float shotID = player.shot_id + 1;
+    player.shot_id = shotID;
+    string deathType = DMSGToString(DMSG_SUICIDE);
+    string weaponType = "";
+
+    this.ShootPost(player.tf_id, weaponType, shotID, deathType);
+}
 
 string WeaponToString(float weapon, float isGren);
-string DMSGToString(float dmsg);
+
 float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
 {
     float shotID = attacker.shot_id + 1;
     attacker.shot_id = shotID;
-    string endpoint = "Shoot";
     string weaponType = "None";
     string deathType = "None";
 
@@ -136,12 +160,7 @@ float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
         weaponType = WeaponToString(weaponTypef, isGren);
     }
     
-    string event;
-    
-    event = strcat("\"TF_ID\":", ftos(attacker.tf_id), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(attacker.shot_id), ", \"GameTime\":", ftos(this.GameTime));
-    event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"GameID\":", ftos(this.GameID));
-
-    this.PostData(endpoint, event);
+    this.ShootPost(attacker.tf_id, weaponType, shotID, deathType);
 
     return shotID;
 }

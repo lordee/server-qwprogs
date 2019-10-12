@@ -596,6 +596,8 @@ string DMSGToString(float dmsg)
         case DMSG_GREN_CALTROP:
             msg = "DMSG_GREN_CALTROP";
             break;
+        case DMSG_SUICIDE:
+            msg = "DMSG_SUICIDE";
         default:
             msg = strcat("NOT FOUND: ", ftos(dmsg));
     }
