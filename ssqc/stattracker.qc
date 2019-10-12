@@ -38,7 +38,6 @@ touches
 caps
 kill on flag carrier
 suicides
-detdispenser and detsentry aren't getting credited to the initiator as "world" does the damage
 // holding concs and non damage grens
 // duelmode needs gamestart maybe?
 disarm detpacks
@@ -168,7 +167,16 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
         tfid = (attacker.real_owner != 0) ? attacker.real_owner.tf_id : inflictor.real_owner.tf_id; // sentry is attacker mostly, inflictor if blowing up etc
         pc = (attacker.real_owner != 0) ? attacker.real_owner.playerclass : inflictor.real_owner.playerclass;
 
-        deathtypef = deathmsg;
+        // sometimes deathmsg not set, explicitly set deathtypef
+        switch (inflictor.classname)
+        {
+            case "building_dispenser":
+                deathtypef = DMSG_DISPENSER_EXPLODE;
+                break;
+            default:
+                deathtypef = deathmsg;
+        }
+        
     }
 
     string deathType = DMSGToString(deathtypef);

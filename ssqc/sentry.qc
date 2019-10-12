@@ -239,9 +239,12 @@ void () Sentry_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = DMSG_SENTRYGUN_EXPLODE;
-        self.shot_id = self.real_owner.shot_id;       
-        float shotid = StatTracker.Shoot(self, DMSG_SENTRYGUN_EXPLODE, FALSE);
-        self.real_owner.shot_id = shotid;
+        if (!self.wasdetted)
+        {
+            self.shot_id = self.real_owner.shot_id;       
+            float shotid = StatTracker.Shoot(self, DMSG_SENTRYGUN_EXPLODE, FALSE);
+            self.real_owner.shot_id = shotid;
+        }
         T_RadiusDamage(self, self.real_owner, 75 + self.ammo_rockets * 8,
                        self);
     }

@@ -650,3 +650,4 @@ float captainmode;
 // stattracker defs
 .float weapontype; // tracks WEAP_ floats on player and projectiles (deathmsg is on .weapon)
 .float shot_id; // allows for tracking of if a shot misses/hits for stats
+.float wasdetted; // tracks if dispenser/sg was destroyed by engineer or not
