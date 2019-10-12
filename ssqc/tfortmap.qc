@@ -747,6 +747,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     local entity oldself;
     local entity te;
     local entity oldte;
+    float captured = FALSE;
 
     stuffcmd(Player, "bf\n");
     if (Goal.classname == "item_tfgoal") {
@@ -756,6 +757,8 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         if (Goal.count > 0) {
             if (Player.team_no > 0) {
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
+                StatTracker.PlayerStateChange(ST_CAPTUREDFLAG, AP);
+                captured = TRUE;
                 TeamFortress_TeamShowScores(2);
                 Player.caps = Player.caps + 1;
             }
@@ -1061,7 +1064,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Goal.axhitme != 0) {
         te = Finditem(Goal.axhitme);
         if (te.owner == Player)
-            tfgoalitem_RemoveFromPlayer(te, Player, 1);
+            tfgoalitem_RemoveFromPlayer(te, Player, 1, captured);
     }
     if (Goal.remove_item_group != 0) {
         te = find(world, classname, "item_tfgoal");
@@ -1070,7 +1073,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     (te.owner == AP)) {
                 oldte = te;
                 te = find(te, classname, "item_tfgoal");
-                tfgoalitem_RemoveFromPlayer(oldte, Player, 1);
+                tfgoalitem_RemoveFromPlayer(oldte, Player, 1, captured);
             } else
                 te = find(te, classname, "item_tfgoal");
         }
@@ -1474,7 +1477,7 @@ void (entity Goal, entity AP) DoGoalWork = {
         te = Finditem(Goal.return_item_no);
         if (te) {
             if (te.goal_state == 1)
-                tfgoalitem_RemoveFromPlayer(te, te.owner, 1);
+                tfgoalitem_RemoveFromPlayer(te, te.owner, 1, FALSE);
             RI = spawn();
             RI.enemy = te;
             RI.weapon = 2;
@@ -1769,6 +1772,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
         winners = 1;
     }
     if (winners == 1) {
+        StatTracker.PlayerStateChange(ST_CAPTUREDFLAG, AP);
         TeamFortress_TeamShowScores(2);
     }
     if (CTF_Map == 1) {
@@ -1778,40 +1782,44 @@ void (entity Goal, entity AP, float addb) DoResults = {
                 while (te != world) {
                     if (te.team_no == 2) {
                         if (te == AP) {
+                            StatTracker.PlayerStateChange(ST_GOTFLAG, AP);
                             winners = random();
-                            if (winners < 0.1) {
+                            if (winners < 0.1) 
+                            {
                                 CenterPrint2(te, "\n\n\n",
                                         "You got the enemy flag!\n\nFlee!");
-                            } else {
-                                if (winners < 0.2) {
-                                    CenterPrint2(te, "\n\n\n",
-                                            "You got the enemy flag!\n\nHead for home!");
-                                } else {
-                                    if (winners < 0.6) {
-                                        CenterPrint2(te, "\n\n\n",
-                                                "You got the enemy flag!\n\nReturn to base!");
-                                    } else {
-                                        if (winners < 0.7) {
-                                            CenterPrint2(te, "\n\n\n",
-                                                    "You got the enemy flag!\n\n<Insert witty comment here>");
-                                        } else {
-                                            if (winners < 0.8) {
-                                                CenterPrint2(te, "\n\n\n",
-                                                        "You got the enemy flag!\n\n");
-                                            } else {
-                                                if (winners < 0.95) {
-                                                    CenterPrint2(te,
-                                                            "\n\n\n",
-                                                            "You got the enemy flag!\n\n");
-                                                } else {
-                                                    CenterPrint2(te,
-                                                            "\n\n\n",
-                                                            "Is that a flag in your pocket\nor are you just happy to see me?");
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                            } 
+                            else if (winners < 0.2) 
+                            {
+                                CenterPrint2(te, "\n\n\n",
+                                        "You got the enemy flag!\n\nHead for home!");
+                            } 
+                            else if (winners < 0.6) 
+                            {
+                                CenterPrint2(te, "\n\n\n",
+                                        "You got the enemy flag!\n\nReturn to base!");
+                            } 
+                            else if (winners < 0.7) 
+                            {
+                                CenterPrint2(te, "\n\n\n",
+                                        "You got the enemy flag!\n\n<Insert witty comment here>");
+                            } 
+                            else if (winners < 0.8) 
+                            {
+                                CenterPrint2(te, "\n\n\n",
+                                        "You got the enemy flag!\n\n");
+                            } 
+                            else if (winners < 0.95) 
+                            {
+                                CenterPrint2(te,
+                                        "\n\n\n",
+                                        "You got the enemy flag!\n\n");
+                            } 
+                            else 
+                            {
+                                CenterPrint2(te,
+                                        "\n\n\n",
+                                        "Is that a flag in your pocket\nor are you just happy to see me?");
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
@@ -2111,6 +2119,7 @@ void () item_tfgoal_touch = {
         if (self.goal_no == 1) {
             if (self.origin != self.oldorigin) {
                 if (other.team_no == 1) {
+                    StatTracker.PlayerStateChange(ST_CAPTUREDFLAG, other);
                     bprint(2, other.netname);
                     bprint(2, Q" \scaptured\s the \sblue\s flag!\n");
                     te = find(world, classname, "player");
@@ -2142,6 +2151,7 @@ void () item_tfgoal_touch = {
             if (self.goal_no == 2) {
                 if (self.origin != self.oldorigin) {
                     if (other.team_no == 2) {
+                        StatTracker.PlayerStateChange(ST_CAPTUREDFLAG, other);
                         bprint(2, other.netname);
                         bprint(2, Q" \scaptured\s the \sred\s flag!\n");
                         te = find(world, classname, "player");
@@ -2204,6 +2214,7 @@ void () item_tfgoal_touch = {
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Item.effects = 0;
 
+    StatTracker.PlayerStateChange(ST_GOTFLAG, AP);
     Item.owner = AP;
     if (Item.mdl != string_null) {
         setmodel(Item, string_null);
@@ -2301,7 +2312,7 @@ void () ReturnItem = {
     dremove(self);
 };
 
-void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
+void (entity Item, entity AP, float method, float fromCapture) tfgoalitem_RemoveFromPlayer = {
     local entity te;
     local entity DelayReturn;
 
@@ -2309,6 +2320,8 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
         objerror("error: tfgoalitem_RemoveFromPlayer(): Item == world");
         return;
     }
+    if (!fromCapture)
+        StatTracker.PlayerStateChange(ST_DROPPEDFLAG, AP);
 
     tfgoalitem_RemoveEffectsFromPlayer(Item, AP);
     Item.angles = '0 0 0';
@@ -2543,6 +2556,8 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.bubble_count = time + Item.pausetime + 5; //used by the return timer
     }
     Item.owner = world;
+
+    StatTracker.PlayerStateChange(ST_DROPPEDFLAG, P);
 };
 
 void () tfgoalitem_remove = {
@@ -2889,7 +2904,7 @@ void () DropGoalItems = {
         if (te.owner == self) {
             if (old_dropflag) {
                 if (te.goal_activation & 4096) {
-                    tfgoalitem_RemoveFromPlayer(te, self, 2);
+                    tfgoalitem_RemoveFromPlayer(te, self, 2, FALSE);
                 }
             }
             //Always allow dropping 4096

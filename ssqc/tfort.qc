@@ -2338,7 +2338,7 @@ void () TeamFortress_RemoveTimers = {
         if (te.owner == self) {
             if (!(te.goal_activation & TFGI_KEEP) ||
                 (self.has_disconnected == 1)) {
-                tfgoalitem_RemoveFromPlayer(te, self, 0);
+                tfgoalitem_RemoveFromPlayer(te, self, 0, FALSE);
             }
             if (CTF_Map == 1) {
                 if (te.goal_no == 1) {
@@ -2766,7 +2766,7 @@ void () TeamFortress_ExplodePerson = {
     float nthink = time + 0.1;
     SpawnHandGrenade(self.owner, vel, nthink, self.weapon);
 
-    if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
+    if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != GR_TYPE_CALTROP))
         bprint(PRINT_MEDIUM, "No ", self.owner.netname,
                 ", swallowing the grenade isn't very effective!\n");
     else if (self.owner.playerclass == PC_SNIPER)

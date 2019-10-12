@@ -1,4 +1,4 @@
-void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer;
+void (entity Item, entity AP, float method, float fromCapture) tfgoalitem_RemoveFromPlayer;
 void (entity spy) TeamFortress_SpyCalcName;
 void () CF_Spy_UndercoverThink;
 void () GasGrenadeMakeGas;
@@ -567,7 +567,7 @@ void (float issilent) CF_Spy_FeignDeath = {
         while (te) {
             if (te.owner == self) {
                 if (!(te.goal_activation & TFGI_KEEP) || self.has_disconnected == 1)
-                    tfgoalitem_RemoveFromPlayer(te, self, 0);
+                    tfgoalitem_RemoveFromPlayer(te, self, 0, FALSE);
                 if (CTF_Map == 1) {
                     if (te.goal_no == 1)
                         bprint(PRINT_HIGH, self.netname, Q" \slost\s the \sblue\s flag!\n");

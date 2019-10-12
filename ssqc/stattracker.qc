@@ -10,8 +10,15 @@ enum
     ST_BECAMEPLAYER,
     ST_BECAMESPECTATOR,
     ST_CHAT,
-    ST_BROADCAST
+    ST_BROADCAST,
+    ST_GOTFLAG,
+    ST_DROPPEDFLAG,
+    ST_CAPTUREDFLAG
 };
+
+string DMSGToString(float dmsg);
+string WeaponToString(float weapon, float isGren);
+float IsCritHit(float weapon, float damage);
 
 float IsGrenNotWeapon(entity inflictor)
 {
@@ -33,22 +40,19 @@ float IsGrenNotWeapon(entity inflictor)
 }
 
 /*
+// TODO list of stuff
 // in game stats
-touches
-caps
-kill on flag carrier
-suicides
-// holding concs and non damage grens
-// duelmode needs gamestart maybe?
+score change
+duelmode needs gamestart maybe?
 disarm detpacks
 reveal spies
 t_damage calls
 quad round start and end
-DMSG_SUICIDE not being found in dmsgtostring
 
-// chat log?
+bundle shoot json messages
 
-// TODO bundle shoot json messages
+// FIXME
+chat log? can't intercept bprints correctly because i'm dumb
 
 */
 
@@ -119,7 +123,6 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(url,"\n"));
     dprint(strcat(data,"\n"));
 }
-string DMSGToString(float dmsg);
 
 void FO_StatTracker :: ShootPost(float tfid, string weaponType, float shotID, string deathType)
 {
@@ -142,8 +145,6 @@ void FO_StatTracker :: Suicide(entity player)
     this.ShootPost(player.tf_id, weaponType, shotID, deathType);
 }
 
-string WeaponToString(float weapon, float isGren);
-
 float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
 {
     float shotID = attacker.shot_id + 1;
@@ -165,8 +166,6 @@ float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
     return shotID;
 }
 
-float IsCritHit(float weapon, float damage);
-
 // damage done, shot hit, killed
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage)
 {
@@ -179,6 +178,15 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     float deathtypef = inflictor.weapon;
     float tfid = attacker.tf_id;
     float pc = attacker.playerclass;
+    float hadFlag = FALSE;
+    entity te;
+    te = find(world, ::classname, "item_tfgoal");
+    while (te) {
+        if (te.owner == targ) {
+            hadFlag = TRUE;
+        }
+        te = find(te, ::classname, "item_tfgoal");
+    }
 
     if (attacker.classname == "building_sentrygun" || inflictor.classname == "building_dispenser"
         || inflictor.classname == "building_sentrygun")
@@ -195,7 +203,6 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
             default:
                 deathtypef = deathmsg;
         }
-        
     }
 
     string deathType = DMSGToString(deathtypef);
@@ -220,7 +227,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     event = strcat(event, "}, \"Target\": {\"TF_ID\": ", ftos(targ.tf_id), ", \"ClassName\": \"", targ.classname, "\", \"Team\":", ftos(targ.team_no), ", \"Class\":");
     event = strcat(event, ftos(targ.playerclass), "}, \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
     event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed), ", \"GameTime:\":", ftos(this.GameTime));
-    event = strcat(event, ", \"GameID\": ", ftos(this.GameID), ", \"DeathType\": \"", deathType, "\"");
+    event = strcat(event, ", \"GameID\": ", ftos(this.GameID), ", \"DeathType\": \"", deathType, "\", \"HadFlag\":", ftos(hadFlag));
 
     this.PostData(endpoint, event);
 }
@@ -256,25 +263,34 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
     switch (stateType)
     {
         case ST_CHANGENAME:
-            eventType = "ChangeName";
+            eventType = "ST_CHANGENAME";
             break;
         case ST_CHANGETEAM:
-            eventType = "ChangeTeam";
+            eventType = "ST_CHANGETEAM";
             break;
         case ST_CHANGECLASS:
-            eventType = "ChangeClass";
+            eventType = "ST_CHANGECLASS";
             break;
         case ST_DISCONNECTED:
-            eventType = "Disconnected";
+            eventType = "ST_DISCONNECTED";
             break;
         case ST_CONNECTED:
-            eventType = "Connected";
+            eventType = "ST_CONNECTED";
             break;
         case ST_BECAMEPLAYER: // TODO implement
-            eventType = "BecamePlayer";
+            eventType = "ST_BECAMEPLAYER";
             break;
         case ST_BECAMESPECTATOR: // TODO implement
-            eventType = "BecameSpectator";
+            eventType = "ST_BECAMESPECTATOR";
+            break;
+        case ST_GOTFLAG:
+            eventType = "ST_GOTFLAG";
+            break;
+        case ST_DROPPEDFLAG:
+            eventType = "ST_DROPPEDFLAG";
+            break;
+        case ST_CAPTUREDFLAG:
+            eventType = "ST_CAPTUREDFLAG";
             break;
     }
 

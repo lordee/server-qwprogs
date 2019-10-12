@@ -299,7 +299,7 @@ void () StartQuadRound =
 	while (te) {
 		if (te.origin != te.oldorigin) {
 			if (te.owner != world)
-				tfgoalitem_RemoveFromPlayer(te, te.owner, 1);
+				tfgoalitem_RemoveFromPlayer(te, te.owner, 1, FALSE);
 			oldself = spawn();
 			oldself.enemy = te;
 			oldself.weapon = 3;
