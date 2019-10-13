@@ -1256,6 +1256,7 @@
 #define DMSG_GREN_CALTROP			41
 #define DMSG_GREN_NAPALM            42
 #define DMSG_SUICIDE				43
+#define DMSG_FALLING				44
 
 /*======================================================*/
 /* Menus						*/

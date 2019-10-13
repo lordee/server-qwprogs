@@ -183,7 +183,8 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     float isCrit = IsCritHit(inflictor.weapon, damage); // direct/full damage
     float shotID = inflictor.shot_id; // player or missile
     float killed = (targ.health <= 0) ? 1 : 0;
-    float deathtypef = inflictor.weapon;
+    float deathtypef = (inflictor.weapon) ? inflictor.weapon : deathmsg; // should probably just use deathmsg all the time...
+    //float deathtypef = deathmsg;
     float tfid = attacker.tf_id;
     float pc = attacker.playerclass;
     float hadFlag = FALSE;

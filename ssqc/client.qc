@@ -2293,6 +2293,7 @@ void () PlayerPostThink = {
                 }
                 fdmg = rint(fdmg);
                 self.deathtype = "falling";
+                deathmsg = DMSG_FALLING;
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
                 sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
             } else {
