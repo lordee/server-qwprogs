@@ -1,5 +1,3 @@
-#include "../share/defs.h"
-
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
 typedef void (float n) f_void_float;
 

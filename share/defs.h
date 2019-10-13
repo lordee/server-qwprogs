@@ -1257,6 +1257,9 @@
 #define DMSG_GREN_NAPALM            42
 #define DMSG_SUICIDE				43
 #define DMSG_FALLING				44
+#define DMSG_DROWN					45
+#define DMSG_SLIME					46
+#define DMSG_LAVA					47
 
 /*======================================================*/
 /* Menus						*/

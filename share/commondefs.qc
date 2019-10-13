@@ -1,3 +1,5 @@
+#include "../share/defs.h"
+
 #define MAX_FLAGINFO_LINES  10
 
 #define MSG_FLAGINFOINIT    1

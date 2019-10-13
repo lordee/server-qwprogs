@@ -600,7 +600,7 @@ void () PainSound = {
         sound(self, 2, "player/teledth1.wav", 1, 0);
         return;
     }
-    if ((self.watertype == -3) && (self.waterlevel == 3)) {
+    if ((self.watertype == CONTENT_WATER) && (self.waterlevel == 3)) {
         DeathBubbles(1);
         if (random() > 0.5) {
             sound(self, 2, "player/drown1.wav", 1, 1);
@@ -609,7 +609,7 @@ void () PainSound = {
         }
         return;
     }
-    if (self.watertype == -4) {
+    if (self.watertype == CONTENT_SLIME) {
         if (random() > 0.5) {
             sound(self, 2, "player/lburn1.wav", 1, 1);
         } else {
@@ -617,7 +617,7 @@ void () PainSound = {
         }
         return;
     }
-    if (self.watertype == -5) {
+    if (self.watertype == CONTENT_LAVA) {
         if (random() > 0.5) {
             sound(self, 2, "player/lburn1.wav", 1, 1);
         } else {

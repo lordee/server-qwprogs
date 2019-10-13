@@ -1844,9 +1844,9 @@ void () PlayerJump = {
         return;
 
     if (self.waterlevel >= 2) {
-        if (self.watertype == -3)
+        if (self.watertype == CONTENT_WATER)
             self.velocity_z = 100;
-        else if (self.watertype == -4)
+        else if (self.watertype == CONTENT_SLIME)
             self.velocity_z = 80;
         else
             self.velocity_z = 50;
@@ -1937,9 +1937,11 @@ void () WaterMove = {
         self.dmg = 2;
     } else if (self.air_finished < time) {
         if (self.pain_finished < time) {
+            // drowning in water
             self.dmg = self.dmg + 2;
             if (self.dmg > 15)
                 self.dmg = 10;
+            deathmsg = DMSG_DROWN;
             TF_T_Damage(self, world, world, self.dmg, 1, 0);
             self.pain_finished = time + 1;
         }
@@ -1951,28 +1953,30 @@ void () WaterMove = {
         }
         return;
     }
-    if (self.watertype == -5) {
+    if (self.watertype == CONTENT_LAVA) {
         if (self.dmgtime < time) {
             if (self.radsuit_finished > time)
                 self.dmgtime = time + 1;
             else
                 self.dmgtime = time + 0.2;
+            deathmsg = DMSG_LAVA;
             TF_T_Damage(self, world, world, (10 * self.waterlevel), 0, 16);
         }
-    } else if (self.watertype == -4) {
+    } else if (self.watertype == CONTENT_SLIME) {
         if ((self.dmgtime < time) && (self.radsuit_finished < time)) {
             self.dmgtime = time + 1;
+            deathmsg = DMSG_SLIME;
             T_Damage(self, world, world, (4 * self.waterlevel));
         }
     }
     if (!(self.flags & 16)) {
-        if (self.watertype == -5) {
+        if (self.watertype == CONTENT_LAVA) {
             sound(self, 4, "player/inlava.wav", 1, 1);
         }
-        if (self.watertype == -3) {
+        if (self.watertype == CONTENT_WATER) {
             sound(self, 4, "player/inh2o.wav", 1, 1);
         }
-        if (self.watertype == -4) {
+        if (self.watertype == CONTENT_SLIME) {
             sound(self, 4, "player/slimbrn2.wav", 1, 1);
         }
         self.flags = self.flags + 16;
@@ -2079,7 +2083,7 @@ void () PlayerPreThink = {
         }
         if (self.waterlevel) {
             if (self.waterlevel == 1) {
-                self.watertype = -3;
+                self.watertype = CONTENT_WATER;
                 self.waterlevel = 3;
             }
             self.velocity_z = -100;
@@ -2278,7 +2282,7 @@ void () PlayerPostThink = {
 
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
-        if (self.watertype == -3) {
+        if (self.watertype == CONTENT_WATER) {
             sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {
@@ -2894,17 +2898,17 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
         ) && (pe_attacker.deathtype || pe_attacker.n_b || pe_attacker.netname_broadcast))) {
             rnum = pe_target.watertype;
 
-            if (rnum == -3) {
+            if (rnum == CONTENT_WATER) {
                 if (random() < 0.5)
                     s_deathstring = " sleeps with the fishes\n";
                 else
                     s_deathstring = " sucks it down\n";
-            } else if (rnum == -4) {
+            } else if (rnum == CONTENT_SLIME) {
                 if (random() < 0.5)
                     s_deathstring = " gulped a load of slime\n";
                 else
                     s_deathstring = " can't exist on slime alone\n";
-            } else if (rnum == -5) {
+            } else if (rnum == CONTENT_LAVA) {
                 if (pe_target.health < -15)
                     s_deathstring = " burst into flames\n";
                 else if (random() < 0.5)
@@ -2928,7 +2932,6 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                 s_deathstring = " died\n";
 
             return strcat(pe_target.netname, s_deathstring);
-
         }
 
     } else if (pe_target.classname == "building_sentrygun") {
@@ -3073,7 +3076,7 @@ void() SV_RunClientCommand = {
 
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
-        if (self.watertype == -3) {
+        if (self.watertype == CONTENT_WATER) {
             sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {
