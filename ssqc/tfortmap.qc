@@ -2139,7 +2139,7 @@ void () item_tfgoal_touch = {
                     self.origin = self.oldorigin;
                     setmodel(self, self.mdl);
                     setorigin(self, self.origin);
-                   sound(self, 2, "items/itembk2.wav", 1, 1);
+                    sound(self, 2, "items/itembk2.wav", 1, 1);
                     return;
                 }
             } else {

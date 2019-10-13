@@ -29,6 +29,7 @@ void () player_touch = {
                     bprint(PRINT_MEDIUM, other.netname,
                            " uncovered an enemy spy!\n");
                     Spy_RemoveDisguise(self);
+                    StatTracker.PlayerAction(ST_REVEALSPY, other);
                 }
             }
             if ((other.undercover_team != 0) ||
@@ -40,6 +41,7 @@ void () player_touch = {
                     bprint(PRINT_MEDIUM, self.netname,
                            " uncovered an enemy spy!\n");
                     Spy_RemoveDisguise(other);
+                    StatTracker.PlayerAction(ST_REVEALSPY, other);
                 }
             }
         }
