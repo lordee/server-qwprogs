@@ -53,6 +53,7 @@ became player
 became spectator
 bundle shoot json messages
 
+
 // FIXME
 chat log? can't intercept bprints correctly because i'm dumb
 
@@ -135,7 +136,7 @@ void FO_StatTracker :: ShootPost(float tfid, string weaponType, float shotID, st
     string endpoint = "Shoot";
     string event;
     
-    event = strcat(this.GameString(), "\"TF_ID\":", ftos(tfid), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(shotID));
+    event = strcat(this.GameString(), ", \"TF_ID\":", ftos(tfid), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(shotID));
     event = strcat(event, ", \"DeathType\": \"", deathType, "\"");
 
     this.PostData(endpoint, event);
@@ -175,6 +176,7 @@ float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
 // damage done, shot hit, killed
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage)
 {
+    dprint(strcat("deathtype: ", targ.deathtype, "\n"));
     /*if (this.GameID == 0)
         return;*/
     string endpoint = "Damage";
@@ -229,7 +231,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     }
 
     string event;
-    event = strcat(this.GameString(), "\"Attacker\": ", this.PlayerString(attacker), ", \"Target\": ", this.PlayerString(targ));
+    event = strcat(this.GameString(), ", \"Attacker\": ", this.PlayerString(attacker), ", \"Target\": ", this.PlayerString(targ));
     event = strcat(event, ", \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
     event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed));
     event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"HadFlag\":", ftos(hadFlag));
@@ -237,7 +239,7 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     this.PostData(endpoint, event);
 }
 
-void FO_StatTracker :: PlayerAction(float action, entity player)
+void FO_StatTracker :: PlayerAction(float action, entity targ, entity attacker)
 {
     string endpoint = "PlayerAction";
     string event = "";
@@ -253,7 +255,7 @@ void FO_StatTracker :: PlayerAction(float action, entity player)
             break;
     }
 
-    event = strcat(this.GameString(), ", \"Action\": \"", actionString, "\", \"Player\": ", this.PlayerString(player));
+    event = strcat(this.GameString(), ", \"Action\": \"", actionString, "\", \"Attacker\": ", this.PlayerString(attacker), ", \"Target\":", this.PlayerString(targ));
     this.PostData(endpoint, event);
 }
 
@@ -409,13 +411,14 @@ void FO_StatTracker :: BroadcastMessage(float stateType, float msglvl, string s,
 // generate common strings
 string FO_StatTracker :: GameString()
 {
-    return strcat("\"GameID\": ", ftos(this.GameID), ", \"GameTime\": ", ftos(this.GameTime), ",");
+    return strcat("\"GameID\": ", ftos(this.GameID), ", \"GameTime\": ", ftos(this.GameTime));
 }
 
 string FO_StatTracker :: PlayerString(entity p)
 {
     string event;
-    event = strcat("{\"TF_ID\":", ftos(p.tf_id), ", \"Name\":\"", p.netname, "\", \"Team\":", ftos(p.team_no));
+    string name = (p.netname != "") ? p.netname : p.classname;
+    event = strcat("{\"TF_ID\":", ftos(p.tf_id), ", \"Name\":\"", name, "\", \"Team\":", ftos(p.team_no));
     event = strcat(event, ", \"Class\":", ftos(p.playerclass), "}");
     return event;
 }

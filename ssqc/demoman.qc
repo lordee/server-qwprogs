@@ -443,7 +443,7 @@ void () TeamFortress_DetpackDisarm = {
     TeamFortress_SetSpeed(self.owner);
     self.enemy.owner.detpack_left = 0;
     Status_Refresh(self.enemy.owner);
-    StatTracker.PlayerAction(ST_DISARMDETPACK, self.owner);
+    StatTracker.PlayerAction(ST_DISARMDETPACK, self.enemy.owner, self.owner);
 
     dremove(self.enemy.oldenemy);
     dremove(self.enemy);
