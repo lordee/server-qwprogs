@@ -256,14 +256,20 @@ void () tdeath_touch = {
             self.classname = "teledeath2";
 
         if (self.owner.classname != "player") {
+            deathmsg = DMSG_TELEDEATH2;
+            self.weapon = DMSG_TELEDEATH2;
             T_Damage(self.owner, self, self, 5000);
             return;
         }
     }
 
     if (other.health)
+    {
+        deathmsg = DMSG_TELEDEATH;
+        self.weapon = DMSG_TELEDEATH;
         T_Damage(other, self, self, 5000);
-
+    }
+        
     if (other.think == TeamFortress_DetpackExplode) {
         other.solid = SOLID_NOT;
         other.nextthink = time + 1 + random() * 2;

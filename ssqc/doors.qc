@@ -16,6 +16,7 @@ void () door_blocked = {
         dremove(other);
         return;
     }
+    deathmsg = DMSG_SQUISHED;
     T_Damage(other, self, self, self.dmg);
 
     if (self.wait >= 0 && self.forcecloseonblock == 0) {
@@ -542,6 +543,7 @@ void () secret_blocked = {
         return;
 
     self.attack_finished = time + 0.5;
+    deathmsg = DMSG_SQUISHED;
     T_Damage(other, self, self, self.dmg);
 };
 

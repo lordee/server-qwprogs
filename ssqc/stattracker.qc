@@ -47,6 +47,7 @@ float IsGrenNotWeapon(entity inflictor)
 // in game stats
 duelmode needs gamestart maybe?
 t_damage calls
+t_radiusdamage calls
 quad round start and end
 dismantle sentries and dispensers
 became player

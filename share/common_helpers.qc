@@ -33,7 +33,7 @@ string WeaponToString(float weapon, float isGren)
         switch (weapon)
         {
             case GR_TYPE_NORMAL:
-            msg = "GR_TYPE_NORMAL";
+                msg = "GR_TYPE_NORMAL";
             break;
             case GR_TYPE_CONCUSSION:
                 msg = "GR_TYPE_CONCUSSION";
@@ -279,6 +279,17 @@ string DMSGToString(float dmsg)
         case DMSG_LAVA:
             msg = "DMSG_LAVA";
             break;
+        case DMSG_EXPLODEBOX:
+            msg = "DMSG_EXPLODEBOX";
+            break;
+        case DMSG_SQUISHED:
+            msg = "DMSG_SQUISHED";
+            break;
+        case DMSG_TRAPSHOOTER:
+            msg = "DMSG_TRAPSHOOTER";
+            break;
+        case DMSG_FIREBALL:
+            msg = "DMSG_FIREBALL";
         default:
             msg = strcat("NOT FOUND: ", ftos(dmsg));
     }

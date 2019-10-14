@@ -153,6 +153,7 @@ void () fire_fly = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
     newmis.nextthink = time + 5;
+    newmis.weapon = DMSG_FIREBALL;
     newmis.think = SUB_Remove;
     newmis.touch = fire_touch;
     self.nextthink = time + random() * 5 + 3;
@@ -161,7 +162,10 @@ void () fire_fly = {
 
 void () fire_touch = {
     if (other.takedamage)
+    {
+        deathmsg = DMSG_FIREBALL;
         TF_T_Damage(other, self, self, 20, 0, 16);
+    }        
 
     dremove(self);
 };
@@ -169,6 +173,7 @@ void () fire_touch = {
 void () barrel_explode = {
     self.takedamage = 0;
     self.classname = "explo_box";
+    deathmsg = DMSG_EXPLODEBOX;
     T_RadiusDamage(self, self, 160, world);
     WriteByte(4, 23);
     WriteByte(4, 3);
@@ -293,6 +298,7 @@ void () spikeshooter_use = {
 
         launch_spike(self.origin, self.movedir);
         newmis.velocity = self.movedir * 500;
+        newmis.weapon = DMSG_TRAPSHOOTER;
 
         if (self.spawnflags & 1)
             newmis.touch = superspike_touch;

@@ -1260,6 +1260,10 @@
 #define DMSG_DROWN					45
 #define DMSG_SLIME					46
 #define DMSG_LAVA					47
+#define DMSG_EXPLODEBOX				48
+#define DMSG_SQUISHED				49
+#define DMSG_TRAPSHOOTER			50
+#define DMSG_FIREBALL				51
 
 /*======================================================*/
 /* Menus						*/
