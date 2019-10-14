@@ -773,6 +773,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     T_Heal(Player, Goal.health, 0);
             }
             if (Goal.health < 0) {
+                deathmsg = DMSG_ITEMGOAL;
                 if ((0 - Player.health) > Goal.health) {
                     TF_T_Damage(Player, Goal, Goal, (Player.health + 1), 1,
                             0);
@@ -1128,7 +1129,10 @@ void (entity Goal, entity Player) RemoveResults = {
             Player.item_list - (Player.item_list & Goal.item_list);
     }
     if (Goal.health > 0)
+    {
+        deathmsg = DMSG_ITEMGOAL;
         TF_T_Damage(Player, Goal, Goal, Goal.health, 1, 0);
+    }
 
     if (Goal.health < 0)
         T_Heal(Player, (0 - Goal.health), 0);

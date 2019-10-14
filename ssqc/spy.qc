@@ -1031,7 +1031,7 @@ void () GasGrenadeMakeGas = {
             while (te) {
                 if ((te.owner == self.owner) &&
                     (te.no_active_gas_grens == 1)) {
-                    te.weapon = 24;
+                    te.weapon = DMSG_GREN_GAS;
                     te.think = RemoveGrenade;
                     te.nextthink = time + 0.1;
                 }
@@ -1046,7 +1046,7 @@ void () GasGrenadeMakeGas = {
         if (CanDamage(te, self)) {
             if (((te.classname == "player") && (te.deadflag == 0)) &&
                 (te.has_disconnected != 1)) {
-                deathmsg = 24;
+                deathmsg = DMSG_GREN_GAS;
                 TF_T_Damage(te, world, self.owner, 10, (1 | 2), 0);
                 if (te.tfstate & 16384) {
                     timer = find(world, classname, "timer");
@@ -1351,7 +1351,7 @@ void () T_TranqDartTouch = {
             }
         }
         spawn_touchblood(9);
-        deathmsg = 25;
+        deathmsg = DMSG_TRANQ;
         TF_T_Damage(other, self, self.owner, 20, 2, 2);
     } else {
         WriteByte(4, 23);

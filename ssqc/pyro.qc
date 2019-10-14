@@ -151,7 +151,7 @@ void () NapalmGrenadeNetThink = {
     head = findradius(self.origin, 180);
     while (head) {
         if (head.takedamage) {
-            deathmsg = DMSG_FLAME;
+            deathmsg = DMSG_GREN_NAPALM;
             TF_T_Damage(head, self, self.owner, 20, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
             other = head;
@@ -305,7 +305,7 @@ void () FlameFollow = {
             damage = 1;
         }
         self.heat = 1;
-        deathmsg = 15;
+        deathmsg = DMSG_FLAME;
         TF_T_Damage(self.enemy, self, self.owner, damage, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
     } else {
@@ -506,7 +506,7 @@ void () Napalm_touch = {
     }
     if (other != world) {
         if ((other.takedamage == 2) && (other.health > 0)) {
-            deathmsg = DMSG_FLAME;
+            deathmsg = DMSG_GREN_NAPALM;
             TF_T_Damage(other, self, self.owner, 6, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
             if (cb_prematch) {
@@ -657,7 +657,7 @@ void () T_IncendiaryTouch = {
     else   
         damg = 30 + random() * 20;
     if (other.health) {
-        deathmsg = DMSG_FLAME;
+        deathmsg = DMSG_INCENDIARYL;
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
     }
@@ -671,7 +671,7 @@ void () T_IncendiaryTouch = {
                 if ((trace_fraction == 1)
                     || ((trace_fraction != 1)
                         && (vlen(self.origin - head.origin) <= 64))) {
-                    deathmsg = DMSG_FLAME;
+                    deathmsg = DMSG_INCENDIARYL;
                     TF_T_Damage(head, self, self.owner, 10, TF_TD_NOTTEAM,
                                 TF_TD_FIRE);
                     other = head;

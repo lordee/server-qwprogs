@@ -337,6 +337,7 @@ void () W_FireSpanner = {
             deathmsg = DMSG_SPANNER;
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         } else {
+            deathmsg = DMSG_SPANNER;
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
     } else {
@@ -594,6 +595,7 @@ void () W_FireMedikit = {
                 trace_ent.infection_team_no = self.team_no;
             }
         } else {
+            deathmsg = DMSG_BIOWEAPON_ATT;
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
     } else {
@@ -1114,6 +1116,7 @@ void (entity from, float damage) LightningHit = {
     WriteCoord(MSG_MULTICAST, trace_endpos_z);
     multicast(trace_endpos, MULTICAST_PVS);
 
+    deathmsg = DMSG_LIGHTNING;
     TF_T_Damage(trace_ent, from, from, damage, TF_TD_NOTTEAM,
                 TF_TD_ELECTRICITY);
 };

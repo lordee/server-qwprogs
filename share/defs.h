@@ -1264,6 +1264,11 @@
 #define DMSG_SQUISHED				49
 #define DMSG_TRAPSHOOTER			50
 #define DMSG_FIREBALL				51
+#define DMSG_LASER					52 // laser trap
+#define DMSG_INCENDIARYL			53
+#define DMSG_ITEMGOAL				54
+#define DMSG_TELEDEATH				55
+#define DMSG_TELEDEATH2				56
 
 /*======================================================*/
 /* Menus						*/

@@ -2565,7 +2565,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " chars himself with an incendiary rocket\n";
                 else if (pf_deathmsg == DMSG_GRENADEL)
                     s_deathstring = " tries to put the pin back in\n";
-                else if (pf_deathmsg == DMSG_FLAME)
+                else if (pf_deathmsg == DMSG_FLAME || pf_deathmsg == DMSG_INCENDIARYL || pf_deathmsg == DMSG_GREN_NAPALM)
                     s_deathstring = " torches himself\n";
                 else if (pf_deathmsg == DMSG_LIGHTNING && pe_target.waterlevel > 1)
                     s_deathstring = " discharges into the water\n";
@@ -2692,7 +2692,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                         s_deathstring = " was gibbed by ";
                         s_deathstring2 = "'s rocket\n";
                     }
-                } else if (pf_deathmsg == DMSG_FLAME) {
+                } else if (pf_deathmsg == DMSG_FLAME || pf_deathmsg == DMSG_INCENDIARYL || pf_deathmsg == DMSG_GREN_NAPALM) {
                     if (rnum < 0.2) {
                         s_deathstring = " is burnt up by ";
                         s_deathstring2 = "'s flame\n";

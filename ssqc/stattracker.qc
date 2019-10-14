@@ -53,7 +53,7 @@ dismantle sentries and dispensers
 became player
 became spectator
 bundle shoot json messages
-
+dmsg_flame and dmsg_napalm, DMSG_INCENDIARYL
 
 // FIXME
 chat log? can't intercept bprints correctly because i'm dumb

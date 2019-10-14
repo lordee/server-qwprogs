@@ -290,6 +290,16 @@ string DMSGToString(float dmsg)
             break;
         case DMSG_FIREBALL:
             msg = "DMSG_FIREBALL";
+            break;
+        case DMSG_LASER:
+            msg = "DMSG_LASER";
+            break;
+        case DMSG_INCENDIARYL:
+            msg = "DMSG_INCENDIARYL";
+            break;
+        case DMSG_ITEMGOAL:
+            msg = "DMSG_ITEMGOAL";
+            break;
         default:
             msg = strcat("NOT FOUND: ", ftos(dmsg));
     }

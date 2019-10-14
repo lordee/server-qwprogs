@@ -256,6 +256,7 @@ void () Laser_Touch = {
     org = self.origin - 8 * normalize(self.velocity);
     if (other.health) {
         SpawnBlood(org, 15);
+        deathmsg = DMSG_LASER;
         TF_T_Damage(other, self, self.owner, 15, 0, TF_TD_ELECTRICITY);
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
