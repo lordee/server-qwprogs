@@ -92,6 +92,7 @@ void () QuadRoundThink = {
             {
                 local string st;
                 st = infokey(world, "round_delay_time");
+				StatTracker.GameStateChange(ST_ROUNDEND);
                 bprint(PRINT_HIGH, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
 
@@ -141,6 +142,7 @@ void () QuadRoundBegin = {
 		te = find (te, classname, "player");
 	}
 
+	StatTracker.GameStateChange(ST_ROUNDSTART);
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
  	round_active = 1;
 	round_over = 0;
@@ -274,6 +276,7 @@ void () StartQuadRound =
 			p = find(p, classname, "player");
 		}
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
+		StatTracker.GameStateChange(ST_ROUNDEND);
 		StatTracker.GameStateChange(ST_GAMEEND);
 		localcmd("stop\n");
 		return;
@@ -387,12 +390,14 @@ void () StartQuadRound =
 	}
 };
 
+// this isn't used anywhere.... refactor?
 void () EndQuadRound = {
 	if (infokey(world, "quadmode") == "on") {
 		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
 			if (rounds > 1) {
                 local string st;
                 st = infokey(world, "round_delay_time");
+				StatTracker.GameStateChange(ST_ROUNDEND);
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
 				lightstyle (0, "e");
 				self.think = QuadRoundOver;

@@ -3,8 +3,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     local string tmp;
     processedCmd = FALSE;
 
-    dprint(strcat(arg1, "\n"));
-    
     if (arg1)
         arg_num = 1;
     if (arg2)

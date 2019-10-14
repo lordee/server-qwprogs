@@ -2,6 +2,8 @@ enum
 {
     ST_GAMESTART,
     ST_GAMEEND,
+    ST_ROUNDSTART,
+    ST_ROUNDEND,
     ST_CHANGENAME,
     ST_CHANGETEAM,
     ST_CHANGECLASS,
@@ -46,7 +48,6 @@ float IsGrenNotWeapon(entity inflictor)
 // TODO list of stuff
 // in game stats
 duelmode needs gamestart maybe?
-quad round start and end
 bundle shoot json messages
 
 // FIXME
@@ -311,8 +312,8 @@ void FO_StatTracker :: ScoreUpdate()
 
 void FO_StatTracker :: GameStateChange(float stateType)
 {
-    if (stateType != ST_GAMESTART && this.GameID == 0)
-        return;
+    //if (stateType != ST_GAMESTART && this.GameID == 0)
+        //return;
 
     string endpoint = "GameStateChange";
     string event = "";
@@ -334,6 +335,12 @@ void FO_StatTracker :: GameStateChange(float stateType)
             break;
         case ST_GAMEEND:
             eventType = "ST_GAMEEND";
+            break;
+        case ST_ROUNDSTART:
+            eventType = "ST_ROUNDSTART";
+            break;
+        case ST_ROUNDEND:
+            eventType = "ST_ROUNDEND";
             break;
     }
 
