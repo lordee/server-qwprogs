@@ -2,6 +2,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd;
     local string tmp;
     processedCmd = FALSE;
+
+    dprint(strcat(arg1, "\n"));
     
     if (arg1)
         arg_num = 1;
@@ -10,6 +12,9 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
     switch (arg1)
     {
+        case "observe":
+            StatTracker.PlayerStateChange(ST_BECAMESPECTATOR, self);
+            break;
         case "adminpwd":
             processedCmd = TRUE;
             if (arg_num == 2) {

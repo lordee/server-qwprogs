@@ -46,14 +46,8 @@ float IsGrenNotWeapon(entity inflictor)
 // TODO list of stuff
 // in game stats
 duelmode needs gamestart maybe?
-t_damage calls
-t_radiusdamage calls
 quad round start and end
-dismantle sentries and dispensers
-became player
-became spectator
 bundle shoot json messages
-dmsg_flame and dmsg_napalm, DMSG_INCENDIARYL
 
 // FIXME
 chat log? can't intercept bprints correctly because i'm dumb
@@ -177,7 +171,6 @@ float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
 // damage done, shot hit, killed
 void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, float damage)
 {
-    dprint(strcat("deathtype: ", targ.deathtype, "\n"));
     /*if (this.GameID == 0)
         return;*/
     string endpoint = "Damage";
@@ -285,9 +278,6 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
             break;
         case ST_CONNECTED:
             eventType = "ST_CONNECTED";
-            break;
-        case ST_BECAMEPLAYER: // TODO implement
-            eventType = "ST_BECAMEPLAYER";
             break;
         case ST_BECAMESPECTATOR: // TODO implement
             eventType = "ST_BECAMESPECTATOR";
