@@ -978,6 +978,7 @@ void (entity disp) Engineer_UseDispenser = {
         bprint(PRINT_HIGH, self.netname, " dismantled ", disp.real_owner.netname, "'s dispenser\n");
         TF_AddFrags(self, 1);
         sprint(disp.real_owner, PRINT_HIGH, "Your dispenser was dismantled by ",self.netname,"\n");
+        StatTracker.Damage(disp, self, self, 500);
         dremove (disp);
         ThrowGib("progs/dgib1.mdl", -30);
         ThrowGib("progs/dgib2.mdl", -50);
@@ -1146,6 +1147,7 @@ void (entity gun) Engineer_UseSentryGun = {
             bprint(PRINT_HIGH, self.netname, " dismantled ", gun.real_owner.netname, "'s sentry gun\n");
             TF_AddFrags(self, 1);
             sprint(gun.real_owner, PRINT_HIGH, "Your sentry gun was dismantled by ",self.netname,"\n");
+            StatTracker.Damage(gun, self, self, 500);
             dremove (gun.trigger_field);
             dremove (gun);
             ThrowGib("progs/tgib1.mdl", -30);
