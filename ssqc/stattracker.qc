@@ -44,27 +44,6 @@ float IsGrenNotWeapon(entity inflictor)
     return FALSE;
 }
 
-/*
-// TODO list of stuff
-// in game stats
-duelmode needs gamestart maybe?
-
-// FIXME
-chat log? can't intercept bprints correctly because i'm dumb
-
-*/
-
-// TODO - struct to hold this?
-string ShootJSON[50];
-float ShootJSONIndex;
-entity ShootJSONTimer;
-
-void ShootJSONThink()
-{
-    StatTracker.ShootPost(TRUE);
-    self.nextthink = time + 5;
-}
-
 class FO_StatTracker
 {
     float RequestID;
@@ -92,8 +71,29 @@ class FO_StatTracker
     virtual string() GameString;
     virtual string(entity player) PlayerString;
 };
-
 FO_StatTracker StatTracker; // global
+
+/*
+// TODO list of stuff
+// in game stats
+duelmode needs gamestart maybe?
+
+// FIXME
+chat log? can't intercept bprints correctly because i'm dumb
+
+*/
+
+// TODO - struct to hold this?
+string ShootJSON[50];
+float ShootJSONIndex;
+entity ShootJSONTimer;
+
+void ShootJSONThink()
+{
+    StatTracker.ShootPost(TRUE);
+    self.nextthink = time + 5;
+}
+
 void FO_StatTracker :: FO_StatTracker(void)
 {
     this.RequestID = 0;
@@ -150,7 +150,7 @@ string FO_StatTracker :: GenerateShootJSON()
 
     while (counter < 50)
     {
-        line = shootJSON[counter];
+        line = ShootJSON[counter];
         if (line != "")
         {
             if (json == "")
@@ -162,7 +162,7 @@ string FO_StatTracker :: GenerateShootJSON()
                 json = strcat(json, ", ", line);
             }
         }
-        shootJSON[counter++] = "";
+        ShootJSON[counter++] = "";
     }
 
     if (json != "")
@@ -174,7 +174,7 @@ string FO_StatTracker :: GenerateShootJSON()
 
 void FO_StatTracker :: ShootPost(float forcePost)
 {
-    if (ShootJSONIndex == 50 || (forcePost && shootJSONIndex > 0))
+    if (ShootJSONIndex == 50 || (forcePost && ShootJSONIndex > 0))
     {
         string endpoint = "Shoot";
         string postJSON;
@@ -191,7 +191,7 @@ void FO_StatTracker :: AddShootLine(float tfid, string weaponType, float shotID,
     event = strcat(event, ", \"DeathType\": \"", deathType, "\"}");
 
     this.ShootPost(FALSE); // post/flush if necessary
-    ShootJSON[shootJSONIndex++] = event;
+    ShootJSON[ShootJSONIndex++] = event;
 }
 
 void FO_StatTracker :: Suicide(entity player)
