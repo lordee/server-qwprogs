@@ -48,7 +48,6 @@ float IsGrenNotWeapon(entity inflictor)
 // TODO list of stuff
 // in game stats
 duelmode needs gamestart maybe?
-bundle shoot json messages
 
 // FIXME
 chat log? can't intercept bprints correctly because i'm dumb
