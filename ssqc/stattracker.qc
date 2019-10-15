@@ -55,6 +55,17 @@ chat log? can't intercept bprints correctly because i'm dumb
 
 */
 
+// TODO - struct to hold this?
+string ShootJSON[50];
+float ShootJSONIndex;
+entity ShootJSONTimer;
+
+void ShootJSONThink()
+{
+    StatTracker.ShootPost(TRUE);
+    self.nextthink = time + 5;
+}
+
 class FO_StatTracker
 {
     float RequestID;
@@ -73,7 +84,9 @@ class FO_StatTracker
     virtual void(entity targ, entity inflictor, entity attacker, float damage) Damage;
     virtual float(entity attacker, float weaponTypef, float isGren) Shoot;
     virtual void(entity player) Suicide;
-    virtual void(float tfid, string weaponType, float shotID, string deathType) ShootPost;
+    virtual void(float forcePost) ShootPost;
+    virtual void(float tfid, string weaponType, float shotID, string deathType) AddShootLine;
+    virtual string() GenerateShootJSON;
     virtual void(string endpoint, string data) PostData;
     virtual void() ScoreUpdate;
 
@@ -84,11 +97,15 @@ class FO_StatTracker
 FO_StatTracker StatTracker; // global
 void FO_StatTracker :: FO_StatTracker(void)
 {
-    RequestID = 0;
-    URL = "http://localhost:5000/api/SSQCStats";
-    GameID = 0;
-    GameStartReqID = 0;
-    GameTime = 0;
+    this.RequestID = 0;
+    this.URL = "http://localhost:5000/api/SSQCStats";
+    this.GameID = 0;
+    this.GameStartReqID = 0;
+    this.GameTime = 0;
+    ShootJSONIndex = 0;
+    ShootJSONTimer = spawn();
+    ShootJSONTimer.think = ShootJSONThink;
+    ShootJSONTimer.nextthink = time + 5;
 }
 
 void FO_StatTracker :: IncrementGameTime()
@@ -118,7 +135,6 @@ void FO_StatTracker :: IncrementGameTime()
 void FO_StatTracker :: PostData(string endpoint, string data)
 {
     string url = strcat(this.URL, "/", endpoint);
-    data = strcat("{", data, "}");
     
     //uri_post(url, this.RequestID, "application/json", data);
 
@@ -127,15 +143,56 @@ void FO_StatTracker :: PostData(string endpoint, string data)
     dprint(strcat(data,"\n"));
 }
 
-void FO_StatTracker :: ShootPost(float tfid, string weaponType, float shotID, string deathType)
+string FO_StatTracker :: GenerateShootJSON()
 {
-    string endpoint = "Shoot";
-    string event;
-    
-    event = strcat(this.GameString(), ", \"TF_ID\":", ftos(tfid), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(shotID));
-    event = strcat(event, ", \"DeathType\": \"", deathType, "\"");
+    string json = "";
+    string line = "";
+    float counter = 0;
 
-    this.PostData(endpoint, event);
+    while (counter < 50)
+    {
+        line = shootJSON[counter];
+        if (line != "")
+        {
+            if (json == "")
+            {
+                json = line;
+            }
+            else
+            {
+                json = strcat(json, ", ", line);
+            }
+        }
+        shootJSON[counter++] = "";
+    }
+
+    if (json != "")
+    {
+        json = strcat("[", json, "]");
+    }
+    return json;
+}
+
+void FO_StatTracker :: ShootPost(float forcePost)
+{
+    if (ShootJSONIndex == 50 || (forcePost && shootJSONIndex > 0))
+    {
+        string endpoint = "Shoot";
+        string postJSON;
+        postJSON = this.GenerateShootJSON();
+        this.PostData(endpoint, postJSON);
+        ShootJSONIndex = 0;
+    }
+}
+
+void FO_StatTracker :: AddShootLine(float tfid, string weaponType, float shotID, string deathType)
+{
+    string event;
+    event = strcat("{", this.GameString(), ", \"TF_ID\":", ftos(tfid), ", \"WeaponType\": \"", weaponType, "\", \"Shot_ID\":", ftos(shotID));
+    event = strcat(event, ", \"DeathType\": \"", deathType, "\"}");
+
+    this.ShootPost(FALSE); // post/flush if necessary
+    ShootJSON[shootJSONIndex++] = event;
 }
 
 void FO_StatTracker :: Suicide(entity player)
@@ -145,7 +202,7 @@ void FO_StatTracker :: Suicide(entity player)
     string deathType = DMSGToString(DMSG_SUICIDE);
     string weaponType = "";
 
-    this.ShootPost(player.tf_id, weaponType, shotID, deathType);
+    this.AddShootLine(player.tf_id, weaponType, shotID, deathType);
 }
 
 float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
@@ -164,7 +221,7 @@ float FO_StatTracker :: Shoot(entity attacker, float weaponTypef, float isGren)
         weaponType = WeaponToString(weaponTypef, isGren);
     }
     
-    this.ShootPost(attacker.tf_id, weaponType, shotID, deathType);
+    this.AddShootLine(attacker.tf_id, weaponType, shotID, deathType);
 
     return shotID;
 }
@@ -226,10 +283,10 @@ void FO_StatTracker :: Damage(entity targ, entity inflictor, entity attacker, fl
     }
 
     string event;
-    event = strcat(this.GameString(), ", \"Attacker\": ", this.PlayerString(attacker), ", \"Target\": ", this.PlayerString(targ));
+    event = strcat("{", this.GameString(), ", \"Attacker\": ", this.PlayerString(attacker), ", \"Target\": ", this.PlayerString(targ));
     event = strcat(event, ", \"WeaponType\": \"", weaponType, "\", \"Damage\":", ftos(damage), ", \"Shot_ID\":", ftos(shotID));
     event = strcat(event, ", \"VHeight\":", ftos(vheight), ", \"Killed\":", ftos(killed));
-    event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"HadFlag\":", ftos(hadFlag));
+    event = strcat(event, ", \"DeathType\": \"", deathType, "\", \"HadFlag\":", ftos(hadFlag), "}");
 
     this.PostData(endpoint, event);
 }
@@ -250,7 +307,8 @@ void FO_StatTracker :: PlayerAction(float action, entity targ, entity attacker)
             break;
     }
 
-    event = strcat(this.GameString(), ", \"Action\": \"", actionString, "\", \"Attacker\": ", this.PlayerString(attacker), ", \"Target\":", this.PlayerString(targ));
+    event = strcat("{", this.GameString(), ", \"Action\": \"", actionString, "\", \"Attacker\": ", this.PlayerString(attacker), ", \"Target\":", this.PlayerString(targ));
+    event = strcat(event, "}");
     this.PostData(endpoint, event);
 }
 
@@ -295,8 +353,7 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
             break;
     }
 
-    event = strcat(this.GameString(), ", \"EventType\": \"", eventType, "\", \"Player\": ", this.PlayerString(player));
-
+    event = strcat("{", this.GameString(), ", \"EventType\": \"", eventType, "\", \"Player\": ", this.PlayerString(player), "}");
     this.PostData(endpoint, event);
 }
 
@@ -305,8 +362,8 @@ void FO_StatTracker :: ScoreUpdate()
     string endpoint = "ScoreUpdate";
     string event = "";
 
-    event = strcat(this.GameString(), ", \"TeamOne\":", ftos(team1score));
-    event = strcat(event, ", \"TeamTwo\":", ftos(team2score), "\"TeamThree\":", ftos(team3score), "\"TeamFour\":", ftos(team4score));
+    event = strcat("{", this.GameString(), ", \"TeamOne\":", ftos(team1score));
+    event = strcat(event, ", \"TeamTwo\":", ftos(team2score), "\"TeamThree\":", ftos(team3score), "\"TeamFour\":", ftos(team4score), "}");
     this.PostData(endpoint, event);
 }
 
@@ -334,6 +391,7 @@ void FO_StatTracker :: GameStateChange(float stateType)
             eventType = "ST_GAMESTART";
             break;
         case ST_GAMEEND:
+            this.ShootPost(TRUE);
             eventType = "ST_GAMEEND";
             break;
         case ST_ROUNDSTART:
@@ -346,7 +404,7 @@ void FO_StatTracker :: GameStateChange(float stateType)
 
     string currmap;
     currmap = strtrim(mapname);
-    event = strcat(this.GameString(), ", \"ServerName\": \"", serverName);
+    event = strcat("{", this.GameString(), ", \"ServerName\": \"", serverName);
     event = strcat(event, ", \"EventType\": \"", eventType, "\", \"Map\": \"", currmap, "\", \"Initiator\": \"world\"");
     // send player info too
     entity p;
@@ -382,7 +440,7 @@ void FO_StatTracker :: GameStateChange(float stateType)
         event = strcat(event, this.PlayerString(p));
         p = find(p, ::classname, "observer");
     }
-    event = strcat(event, "]");
+    event = strcat(event, "]}");
 
     this.PostData(endpoint, event);
 }
