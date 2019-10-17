@@ -44,6 +44,7 @@ float IsGrenNotWeapon(entity inflictor)
     return FALSE;
 }
 
+
 class FO_StatTracker
 {
     float RequestID;
@@ -77,6 +78,8 @@ FO_StatTracker StatTracker; // global
 // TODO list of stuff
 // in game stats
 duelmode needs gamestart maybe?
+scoreupdate isn't used
+name changes?
 
 // FIXME
 chat log? can't intercept bprints correctly because i'm dumb
