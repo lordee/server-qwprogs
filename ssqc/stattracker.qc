@@ -48,6 +48,7 @@ float IsGrenNotWeapon(entity inflictor)
 // TODO list of stuff
 // in game stats
 duelmode needs gamestart maybe?
+scoreupdate isn't used anywhere
 
 // FIXME
 chat log? can't intercept bprints correctly because i'm dumb
