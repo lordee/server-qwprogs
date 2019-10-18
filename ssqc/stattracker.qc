@@ -76,12 +76,10 @@ FO_StatTracker StatTracker; // global
 
 /*
 // TODO list of stuff
-// in game stats
 duelmode needs gamestart maybe?
-scoreupdate isn't used
 name changes?
 
-// FIXME
+// FIXME BroadcastMessage
 chat log? can't intercept bprints correctly because i'm dumb
 
 */
@@ -340,7 +338,7 @@ void FO_StatTracker :: PlayerStateChange(float stateType, entity player)
         case ST_CONNECTED:
             eventType = "ST_CONNECTED";
             break;
-        case ST_BECAMESPECTATOR: // TODO implement
+        case ST_BECAMESPECTATOR:
             eventType = "ST_BECAMESPECTATOR";
             break;
         case ST_GOTFLAG:
